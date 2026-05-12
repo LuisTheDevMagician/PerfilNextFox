@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Socket } from 'socket.io-client';
-import { getSocket, getSessionId } from '@/lib/socket';
+import { getSocket, getSessionId, type WsClient } from '@/lib/socket';
 import { soundManager } from '@/lib/soundManager';
 import { Card } from '@/lib/cards';
 import StarIcon from '@mui/icons-material/Star';
@@ -41,7 +40,7 @@ interface Answer {
 
 export default function GamePage() {
   const router = useRouter();
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<WsClient | null>(null);
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
   const [revealedClueIndices, setRevealedClueIndices] = useState<number[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);

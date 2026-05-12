@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Socket } from 'socket.io-client';
-import { getSocket, getSessionId, disconnectSocket, clearSession } from '@/lib/socket';
+import { getSocket, getSessionId, disconnectSocket, clearSession, type WsClient } from '@/lib/socket';
 import CasinoIcon from '@mui/icons-material/Casino';
 import GroupIcon from '@mui/icons-material/Group';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -24,7 +23,7 @@ interface Player {
 function LobbyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<WsClient | null>(null);
 
   const [players, setPlayers] = useState<Player[]>([]);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);

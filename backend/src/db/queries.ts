@@ -2,6 +2,8 @@ import { sqlite } from './index';
 
 export const queries = {
   criarSessao: (nomeHost: string): number => {
+    // Fecha sessões anteriores antes de criar uma nova
+    sqlite.prepare('UPDATE sessoes_jogo SET esta_ativa = 0').run();
     const stmt = sqlite.prepare('INSERT INTO sessoes_jogo (nome_host) VALUES (?)');
     const result = stmt.run(nomeHost);
     return Number(result.lastInsertRowid);
