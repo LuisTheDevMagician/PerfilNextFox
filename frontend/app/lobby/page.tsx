@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Socket } from 'socket.io-client';
-import { getSocket, getSessionId, disconnectSocket, clearSession } from '@/lib/socket';
+import { getSocket, getSessionId, disconnectSocket, clearSession, type WsClient } from '@/lib/socket';
 import CasinoIcon from '@mui/icons-material/Casino';
 import GroupIcon from '@mui/icons-material/Group';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -24,7 +23,7 @@ interface Player {
 function LobbyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<WsClient | null>(null);
 
   const [players, setPlayers] = useState<Player[]>([]);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
@@ -220,9 +219,9 @@ function LobbyContent() {
         {/* Top bar */}
         <div className="panel rounded-2xl px-5 py-3 flex items-center justify-between">
           <button onClick={handleSair}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 hover:brightness-110"
+            className="flex items-center gap-1 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 hover:brightness-110"
             style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.25)', color: '#FCA5A5' }}>
-            <ArrowBackIcon fontSize="small" /> Sair
+            <ArrowBackIcon style={{ fontSize: '1rem' }} /> Sair
           </button>
 
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', letterSpacing: '0.06em' }}>
@@ -231,7 +230,7 @@ function LobbyContent() {
             <span style={{ color: '#F97316' }}>Fox</span>
           </h1>
 
-          <div className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+          <div className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-xs font-semibold"
             style={{
               background: isConnecting ? 'rgba(234,179,8,0.1)' : 'rgba(34,197,94,0.1)',
               border: `1px solid ${isConnecting ? 'rgba(234,179,8,0.25)' : 'rgba(34,197,94,0.25)'}`,

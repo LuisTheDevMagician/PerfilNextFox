@@ -1,6 +1,5 @@
 import { queries } from './db/queries';
 import { gameCards, type Carta, type Jogador, type RespostaPendente, type SessaoJogo } from './models';
-import { getIO } from './socket';
 
 function mapDbToJogador(row: any): Jogador {
   return {
@@ -445,17 +444,6 @@ export class GerenciadorJogo {
       this.atualizarSessao();
     }
     
-    const io = getIO();
-    if (io) {
-      io.emit('game-ended', {
-        ranking: ranking.map(j => ({
-          id: j.id_socket,
-          name: j.nome_jogador,
-          score: j.pontuacao,
-        }))
-      });
-    }
-    
     console.log('🏆 Jogo encerrado! Vencedor:', vencedor?.nome_jogador);
     return ranking;
   }
@@ -498,6 +486,21 @@ export class GerenciadorJogo {
 
   getJogoEncerrado(): boolean {
     return this.jogoEncerrado;
+  }
+
+  getIndiceCartaAtual(): number {
+    return this.sessaoAtual?.id_carta_atual ?? 0;
+  }
+
+  getTotalCartas(): number {
+    if (!this.sessaoAtual) return 0;
+    const temaId = this.sessaoAtual.tema_id;
+    if (temaId) {
+      return queries.buscarCartasPorTema(temaId).length;
+    }
+    const todas = queries.buscarTodasCartas();
+    if (todas.length > 0) return todas.length;
+    return ((require('./models') as any).gameCards as any[]).length;
   }
 
   getCartaAtual(): Carta | null {
@@ -633,6 +636,18 @@ export class GerenciadorJogo {
     const jogadorExistente = queries.buscarJogadorPorSessionId(sessionId);
     if (!jogadorExistente) {
       console.log('❌ Jogador não encontrado no banco com sessionId:', sessionId);
+      return null;
+    }
+    // Não reativar jogadores de sessões antigas
+    if (jogadorExistente.id_sessao !== this.sessaoAtual?.id) {
+      console.log('❌ SessionId pertence a sessão diferente:', jogadorExistente.id_sessao, '≠', this.sessaoAtual?.id);
+      return null;
+    }
+    // Não roubar a identidade de um jogador ainda conectado com outro socket
+    // (evita conflito quando dois jogadores usam o mesmo browser/localStorage)
+    const socketAtual = jogadorExistente.id_socket ?? '';
+    if (socketAtual !== '' && socketAtual !== idSocket) {
+      console.log('❌ Jogador já conectado com socket diferente, não reativar');
       return null;
     }
 

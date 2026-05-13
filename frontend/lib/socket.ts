@@ -1,73 +1,122 @@
-import { io, Socket } from 'socket.io-client';
-
-let socket: Socket | null = null;
+type Handler = (data: any) => void;
 
 function getOrCreateSessionId(): string {
   if (typeof window === 'undefined') return '';
-  
-  const STORAGE_KEY = 'perfil_session_id';
-  let sessionId = localStorage.getItem(STORAGE_KEY);
-  
-  if (!sessionId) {
-    sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-    localStorage.setItem(STORAGE_KEY, sessionId);
+  const KEY = 'perfil_session_id';
+  let id = localStorage.getItem(KEY);
+  if (!id) {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      id = crypto.randomUUID();
+    } else {
+      id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      });
+    }
+    localStorage.setItem(KEY, id);
   }
-  
-  return sessionId;
+  return id;
 }
 
-export const getSocket = (): Socket => {
-  if (!socket) {
-    const socketUrl = typeof window !== 'undefined' 
-      ? `${window.location.protocol}//${window.location.hostname}:3001`
-      : 'http://localhost:3001';
-    
+class WsClient {
+  private ws: WebSocket | null = null;
+  private handlers = new Map<string, Set<Handler>>();
+  private reconnectAttempts = 0;
+  private readonly maxReconnect = 5;
+  private readonly baseUrl: string;
+  id: string = '';
+  connected: boolean = false;
+
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
+    this.connect();
+  }
+
+  private connect() {
+    if (typeof window === 'undefined') return;
     const sessionId = getOrCreateSessionId();
-    
-    console.log('Criando nova conexão socket:', socketUrl, 'sessionId:', sessionId);
-    
-    socket = io(socketUrl, {
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      autoConnect: true,
-      query: { sessionId }
-    });
+    this.ws = new WebSocket(`${this.baseUrl}?sessionId=${sessionId}`);
 
-    socket.on('connect', () => {
-      console.log('✅ Socket conectado:', socket?.id);
-    });
+    this.ws.onmessage = (e: MessageEvent) => {
+      try {
+        const { event, data } = JSON.parse(e.data as string);
+        if (event === 'session-id') {
+          this.id = data.id;
+          this.connected = true;
+          this.reconnectAttempts = 0;
+          this.fire('connect', undefined);
+          return;
+        }
+        this.fire(event, data);
+      } catch {}
+    };
 
-    socket.on('disconnect', (reason) => {
-      console.log('❌ Socket desconectado:', reason);
-    });
+    this.ws.onclose = () => {
+      this.connected = false;
+      this.fire('disconnect', 'transport close');
+      if (this.reconnectAttempts < this.maxReconnect) {
+        this.reconnectAttempts++;
+        setTimeout(() => this.connect(), 1000 * this.reconnectAttempts);
+      }
+    };
 
-    socket.on('connect_error', (error) => {
-      console.error('⚠️ Erro de conexão:', error);
-    });
+    this.ws.onerror = () => {
+      this.fire('connect_error', new Error('WebSocket connection error'));
+    };
   }
-  
-  return socket;
-};
 
-export const disconnectSocket = (): void => {
-  if (socket) {
-    socket.disconnect();
-    socket = null;
+  private fire(event: string, data: any) {
+    this.handlers.get(event)?.forEach(h => h(data));
   }
-};
 
-export const getSessionId = (): string => {
+  on(event: string, handler: Handler): void {
+    if (!this.handlers.has(event)) this.handlers.set(event, new Set());
+    this.handlers.get(event)!.add(handler);
+  }
+
+  off(event: string, handler?: Handler): void {
+    if (!handler) { this.handlers.delete(event); return; }
+    this.handlers.get(event)?.delete(handler);
+  }
+
+  emit(event: string, data?: any): void {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ event, data }));
+    }
+  }
+
+  disconnect(): void {
+    this.reconnectAttempts = this.maxReconnect;
+    this.ws?.close();
+    this.ws = null;
+    this.connected = false;
+  }
+}
+
+export type { WsClient };
+
+let client: WsClient | null = null;
+
+export function getSocket(): WsClient {
+  if (!client) {
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const url = `${proto}//${window.location.hostname}:3001/ws`;
+    client = new WsClient(url);
+  }
+  return client;
+}
+
+export function disconnectSocket(): void {
+  client?.disconnect();
+  client = null;
+}
+
+export function getSessionId(): string {
   return getOrCreateSessionId();
-};
+}
 
-export const clearSession = (): void => {
+export function clearSession(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('perfil_session_id');
   }
-};
+}

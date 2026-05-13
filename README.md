@@ -1,6 +1,6 @@
 # 🎮 Jogo Perfil - Quiz Multiplayer
 
-Jogo web multiplayer local estilo "Perfil" (jogo de adivinhação com dicas progressivas) com arquitetura separada em **Backend** (Bun + Node HTTP + Socket.IO) e **Frontend** (Next.js). Suporta até 11 jogadores simultâneos em tempo real via rede local.
+Jogo web multiplayer local estilo "Perfil" (jogo de adivinhação com dicas progressivas) com arquitetura separada em **Backend** (Bun + Elysia) e **Frontend** (Next.js 16+). Suporta até 11 jogadores simultâneos em tempo real via rede local.
 
 ---
 
@@ -20,8 +20,8 @@ O **Jogo Perfil** é um quiz de adivinhação divertido e educacional onde:
 
 ## 🚀 Tecnologias Utilizadas
 
-- **Frontend**: Next.js 15+ (App Router), TypeScript, Tailwind CSS 4, Material UI / Icons.
-- **Backend**: Bun runtime, Node HTTP, Socket.IO.
+- **Frontend**: Next.js 16+ (App Router), TypeScript, Tailwind CSS 4, Material UI / Icons.
+- **Backend**: Bun runtime, Elysia 1.x, WebSocket nativo do Bun.
 - **Gerenciador de Pacotes Oficial**: Bun.
 
 ---
