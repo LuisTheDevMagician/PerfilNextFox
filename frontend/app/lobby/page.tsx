@@ -11,6 +11,11 @@ import StarIcon from '@mui/icons-material/Star';
 import InfoIcon from '@mui/icons-material/Info';
 import PersonIcon from '@mui/icons-material/Person';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface Player {
   id: string;
@@ -31,6 +36,10 @@ function LobbyContent() {
   const [isConnecting, setIsConnecting] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState('Conectando...');
 
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteUrl, setInviteUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+
   const [disciplinas, setDisciplinas] = useState<{id: number, nome: string}[]>([]);
   const [temas, setTemas] = useState<{id: number, nome: string, disciplina_id: number}[]>([]);
   const [disciplinaSelecionada, setDisciplinaSelecionada] = useState<number>(0);
@@ -40,6 +49,28 @@ function LobbyContent() {
   const [temaNome, setTemaNome] = useState('');
 
   const playerNameParam = searchParams.get('nome') || '';
+
+  useEffect(() => {
+    fetch(`http://${window.location.hostname}:3001/network-ip`)
+      .then(r => r.json())
+      .then(({ ip }: { ip: string }) => setInviteUrl(`http://${ip}:3000`))
+      .catch(() => setInviteUrl(`http://${window.location.hostname}:3000`));
+  }, []);
+
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+    } catch {
+      const el = document.createElement('textarea');
+      el.value = inviteUrl;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2200);
+  };
 
   useEffect(() => {
     const fromVictory = localStorage.getItem('perfil_from_victory');
@@ -213,6 +244,7 @@ function LobbyContent() {
   };
 
   return (
+    <>
     <div className="min-h-screen p-4 py-6">
       <div className="max-w-lg mx-auto space-y-4">
 
@@ -369,6 +401,11 @@ function LobbyContent() {
         {/* Host controls */}
         {currentPlayer?.isHost && (
           <div className="space-y-3">
+            <button onClick={() => setShowInviteModal(true)}
+              className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] hover:brightness-110"
+              style={{ background: 'rgba(196,181,253,0.08)', border: '1px solid rgba(196,181,253,0.25)', color: '#C4B5FD' }}>
+              <QrCode2Icon /> Convidar Jogadores
+            </button>
             {allPlayersRolled && (
               <button onClick={handleSetPlayOrder}
                 className="w-full py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] hover:brightness-110"
@@ -400,6 +437,148 @@ function LobbyContent() {
 
       </div>
     </div>
+
+    {/* Invite modal — rendered outside the scroll container so it overlays the full viewport */}
+    {/* Invite modal */}
+    {showInviteModal && (
+      <div
+        onClick={() => setShowInviteModal(false)}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 50,
+          background: 'rgba(0,0,0,0.72)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '1.5rem',
+          animation: 'fadeInOverlay 0.18s ease',
+        }}>
+        <style>{`
+          @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes slideUpCard { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+          @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+          @keyframes copyFlash { 0%,100% { background: rgba(134,239,172,0.12); } 50% { background: rgba(134,239,172,0.22); } }
+        `}</style>
+
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            background: 'linear-gradient(145deg, rgba(20,15,40,0.97), rgba(12,10,28,0.98))',
+            border: '1px solid transparent',
+            backgroundClip: 'padding-box',
+            borderRadius: '1.5rem',
+            padding: '0',
+            width: '100%', maxWidth: '360px',
+            boxShadow: '0 0 0 1px rgba(124,58,237,0.35), 0 0 40px rgba(124,58,237,0.15), 0 24px 48px rgba(0,0,0,0.5)',
+            animation: 'slideUpCard 0.22s cubic-bezier(0.34,1.56,0.64,1)',
+            overflow: 'hidden',
+          }}>
+
+          {/* Header strip */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(124,58,237,0.35), rgba(236,72,153,0.25), rgba(249,115,22,0.2))',
+            borderBottom: '1px solid rgba(196,181,253,0.12)',
+            padding: '1rem 1.25rem 0.875rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <QrCode2Icon style={{ color: '#C4B5FD', fontSize: '1.25rem' }} />
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: '#E2D9FD', letterSpacing: '0.04em' }}>
+                Convidar Jogadores
+              </span>
+            </div>
+            <button onClick={() => setShowInviteModal(false)}
+              style={{
+                background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '0.5rem', padding: '0.25rem', color: 'rgba(255,255,255,0.5)',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.12)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}>
+              <CloseIcon style={{ fontSize: '1rem' }} />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div style={{ padding: '1.5rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem' }}>
+
+            <p style={{ color: 'rgba(196,181,253,0.65)', fontSize: '0.8rem', textAlign: 'center', margin: 0 }}>
+              Escaneie o QR code ou compartilhe o endereço para entrar na sala
+            </p>
+
+            {/* QR code card */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '1rem',
+              padding: '1rem',
+              boxShadow: '0 0 0 1px rgba(196,181,253,0.2), 0 0 28px rgba(124,58,237,0.2), 0 8px 24px rgba(0,0,0,0.35)',
+              animation: 'popIn 0.28s cubic-bezier(0.34,1.56,0.64,1) 0.08s both',
+            }}>
+              {inviteUrl && (
+                <QRCodeSVG
+                  value={inviteUrl}
+                  size={180}
+                  bgColor="#ffffff"
+                  fgColor="#0f0a1e"
+                  level="M"
+                  style={{ display: 'block' }}
+                />
+              )}
+            </div>
+
+            {/* URL + copy row */}
+            <div style={{
+              width: '100%',
+              display: 'flex',
+              gap: '0.5rem',
+              alignItems: 'stretch',
+            }}>
+              <div style={{
+                flex: 1,
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(196,181,253,0.15)',
+                borderRadius: '0.75rem',
+                padding: '0.6rem 0.875rem',
+                fontFamily: 'monospace',
+                fontSize: '0.8rem',
+                color: '#C4B5FD',
+                letterSpacing: '0.02em',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+              }}>
+                {inviteUrl || '—'}
+              </div>
+
+              <button
+                onClick={handleCopyUrl}
+                style={{
+                  flexShrink: 0,
+                  display: 'flex', alignItems: 'center', gap: '0.375rem',
+                  padding: '0.6rem 0.875rem',
+                  borderRadius: '0.75rem',
+                  border: copied ? '1px solid rgba(134,239,172,0.35)' : '1px solid rgba(196,181,253,0.25)',
+                  background: copied ? 'rgba(134,239,172,0.1)' : 'rgba(124,58,237,0.18)',
+                  color: copied ? '#86EFAC' : '#C4B5FD',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  animation: copied ? 'copyFlash 0.4s ease' : 'none',
+                  whiteSpace: 'nowrap',
+                }}>
+                {copied
+                  ? <><CheckIcon style={{ fontSize: '0.95rem' }} /> Copiado!</>
+                  : <><ContentCopyIcon style={{ fontSize: '0.95rem' }} /> Copiar</>
+                }
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 

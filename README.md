@@ -28,27 +28,37 @@ O **Jogo Perfil** é um quiz de adivinhação divertido e educacional onde:
 
 ## 📦 Instalação e Execução (Início Rápido)
 
-Antes unificado, agora o projeto exige dois instanciamentos paralelos em terminais para funcionar (o Servidor de Dados e o Servidor de Tela).
-
 ### Pré-requisitos
-- [Bun](https://bun.sh/) instalado globalmente 
+- [Bun](https://bun.sh/) instalado globalmente
 
-### Passo 1: Iniciar o Servidor (Backend)
-Em seu terminal raiz do projeto, acesse a pasta `backend`, instale as dependências e inicie-o:
+### Opção A — Um único comando (recomendado)
+
+Na raiz do projeto, instale as dependências de cada serviço uma vez e depois use o script unificado:
+
+```bash
+cd backend && bun install && cd ../frontend && bun install && cd ..
+bun startgame.ts
+```
+
+O script `startgame.ts` sobe o **Backend** (porta 3001) e o **Frontend** (porta 3000) em paralelo num único terminal, com logs prefixados por `[backend]` e `[frontend]`. `Ctrl+C` encerra os dois.
+
+### Opção B — Dois terminais separados
+
+**Terminal 1 — Backend:**
 ```bash
 cd backend
 bun install
 bun run dev
 ```
 
-### Passo 2: Iniciar a Interface (Frontend)
-Em uma aba separada / segundo terminal, navegue até a pasta `frontend`, proceda à instalação das dependências e inicie a build:
+**Terminal 2 — Frontend:**
 ```bash
 cd frontend
 bun install
 bun run dev
 ```
-Após estar rodando com sucesso, o endereço para acessar o app via navegador do desenvolvedor será em: **http://localhost:3000**
+
+Após estar rodando, acesse o app em: **http://localhost:3000**
 
 ---
 
@@ -57,12 +67,14 @@ Após estar rodando com sucesso, o endereço para acessar o app via navegador do
 A beleza do jogo é compartilhar as telas dos jogadores num ambiente interno ou laboratório. Você pode rodar tudo no seu PC (Mestre) e as pessoas no celular via Browser.
 
 1. **Atenção Padrão:** Certifique-se de que nenhum roteador isola aparelhos nem possua bloqueio de rede para os convidados. Todos na mesma Wi-Fi!
-2. **Descubra o IP da Máquina Principal:**
-   - **Windows**: Digite `ipconfig` no Prompt de Comando/PowerShell e busque pela etiqueta "Endereço IPv4" da placa em atividade (Wireless LAN / Ethernet).
-   - **Mac/Linux**: Digite `ifconfig` ou `ip addr` ou `ip a` no terminal bash/zsh. 
-3. **Compartilhe o Endereço:**
-   Se o seu código for `192.168.1.100`, todo e qualquer participante só precisará digitar **`http://192.168.1.100:3000`** e cairá no Lobby do jogo.
- *(Nunca distribua no grupo o texto `"localhost"`, pois esta rede é estritamente pessoal ao seu computador)*
+2. **Convide com QR Code:** Assim que estiver no Lobby como HOST, clique no botão **"Convidar Jogadores"**. O sistema detecta automaticamente o IP da sua máquina na rede e gera um QR Code — basta os convidados escanearem com a câmera do celular para entrar diretamente na sala. Há também um botão **Copiar** para compartilhar o link pelo chat.
+3. **Ou descubra o IP manualmente:**
+   - **Windows**: `ipconfig` → "Endereço IPv4"
+   - **Mac/Linux**: `ip addr` ou `ifconfig`
+
+   Com o IP em mãos (ex: `192.168.1.100`), os jogadores acessam **`http://192.168.1.100:3000`**.
+
+*(Nunca distribua o endereço `"localhost"`, pois essa rede é estritamente pessoal ao seu computador)*
 
 ---
 

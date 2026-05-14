@@ -1,10 +1,20 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
+import { networkInterfaces } from 'os';
 import { wsHandlers } from './ws';
 import { gerenciadorJogo } from './game';
 import { queries } from './db/queries';
 import { seedInitialData } from './db/seed';
 import './db';
+
+function getLanIp(): string {
+  for (const nets of Object.values(networkInterfaces())) {
+    for (const net of nets ?? []) {
+      if (net.family === 'IPv4' && !net.internal) return net.address;
+    }
+  }
+  return 'localhost';
+}
 
 const PORT = 3001;
 
@@ -22,6 +32,7 @@ const app = new Elysia()
   // ── Status ──────────────────────────────────────────────
   .get('/', () => ({ message: 'API Jogo Perfil', version: '1.0.0' }))
   .get('/health', () => ({ status: 'ok', timestamp: new Date().toISOString() }))
+  .get('/network-ip', () => ({ ip: getLanIp() }))
   .get('/game-state', () => {
     const sessao = gerenciadorJogo.buscarSessaoAtiva();
     if (!sessao) return { active: false };
