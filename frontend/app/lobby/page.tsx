@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getSocket, getSessionId, disconnectSocket, clearSession, type WsClient } from '@/lib/socket';
+import { soundManager } from '@/lib/soundManager';
 import CasinoIcon from '@mui/icons-material/Casino';
 import GroupIcon from '@mui/icons-material/Group';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -206,6 +207,7 @@ function LobbyContent() {
   };
 
   const handleRollDice = () => {
+    soundManager.play('rolldice');
     socketRef.current?.emit('roll-dice');
   };
 

@@ -38,6 +38,57 @@ interface Answer {
   timestamp: number;
 }
 
+function Modal({ children, borderColor }: { children: React.ReactNode, borderColor: string }) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 px-4"
+      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}>
+      <div className="glass rounded-2xl p-8 max-w-sm w-full text-center animate-bounce"
+        style={{ borderColor, borderWidth: 1 }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function CountdownRing({ timeLeft, visible, large = false }: { timeLeft: number; visible: boolean; large?: boolean }) {
+  if (!visible) return null;
+  const r = large ? 28 : 18;
+  const strokeWidth = large ? 5 : 4;
+  const size = large ? 68 : 46;
+  const cx = size / 2;
+  const circumference = 2 * Math.PI * r;
+  const dashoffset = circumference * (1 - Math.min(timeLeft, 30) / 30);
+  const isUrgent = timeLeft <= 10;
+  const color = isUrgent ? '#EF4444' : '#C4B5FD';
+
+  return (
+    <div className={isUrgent ? 'animate-pulse' : ''} style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size}>
+        <circle cx={cx} cy={cx} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={strokeWidth} />
+        <circle
+          cx={cx} cy={cx} r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={dashoffset}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${cx} ${cx})`}
+          style={{ transition: 'stroke-dashoffset 0.1s linear, stroke 0.5s ease' }}
+        />
+      </svg>
+      <span
+        style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: large ? '1rem' : '0.7rem', fontWeight: 'bold', color,
+        }}>
+        {Math.ceil(timeLeft)}
+      </span>
+    </div>
+  );
+}
+
 export default function GamePage() {
   const router = useRouter();
   const socketRef = useRef<WsClient | null>(null);
@@ -63,6 +114,8 @@ export default function GamePage() {
   const [currentPlayerId, setCurrentPlayerId] = useState<string>('');
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [totalCards, setTotalCards] = useState(0);
+  const [turnStartedAt, setTurnStartedAt] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number>(30);
   const isRevealingRef = useRef(false);
   const revealedCluesCountRef = useRef(0);
 
@@ -78,7 +131,7 @@ export default function GamePage() {
       socket.emit('request-game-state');
     };
 
-    const handleGameStarted = ({ currentCard: card, currentPlayerIndex: index, currentPlayerId: playerId, players: gamePlayers, currentCardIndex: cardIdx, totalCards: total }: { currentCard: Card, currentPlayerIndex: number, currentPlayerId: string, players: Player[], currentCardIndex?: number, totalCards?: number }) => {
+    const handleGameStarted = ({ currentCard: card, currentPlayerIndex: index, currentPlayerId: playerId, players: gamePlayers, currentCardIndex: cardIdx, totalCards: total, turnStartedAt: newTurnStartedAt }: { currentCard: Card, currentPlayerIndex: number, currentPlayerId: string, players: Player[], currentCardIndex?: number, totalCards?: number, turnStartedAt?: number }) => {
       revealedCluesCountRef.current = 0;
       setCurrentCard(card);
       setCurrentPlayerIndex(index);
@@ -89,6 +142,10 @@ export default function GamePage() {
       setPlayers(deduplicated);
       setShowCorrectAnswer(false);
       setShowNobodyGuessed(false);
+      if (newTurnStartedAt !== undefined) {
+        setTurnStartedAt(newTurnStartedAt);
+        setTimeLeft(30);
+      }
       setIsLoading(false);
       const currentId = socket.id;
       const me = deduplicated.find((p: Player) => p.id === currentId);
@@ -97,7 +154,11 @@ export default function GamePage() {
       setMyId(currentId || '');
     };
 
-    const handleClueRevealed = ({ revealedClueIndices: newRevealed, currentPlayerIndex: newIndex, currentPlayerId: newPlayerId, players: updatedPlayers }: { revealedClueIndices: number[], currentPlayerIndex: number, currentPlayerId: string, players?: Player[] }) => {
+    const handleClueRevealed = ({ revealedClueIndices: newRevealed, currentPlayerIndex: newIndex, currentPlayerId: newPlayerId, players: updatedPlayers, turnStartedAt: newTurnStartedAt }: { revealedClueIndices: number[], currentPlayerIndex: number, currentPlayerId: string, players?: Player[], turnStartedAt?: number }) => {
+      if (newTurnStartedAt !== undefined) {
+        setTurnStartedAt(newTurnStartedAt);
+        setTimeLeft(30);
+      }
       if (newRevealed.length > revealedCluesCountRef.current) {
         soundManager.play('revealClue');
       } else {
@@ -128,11 +189,13 @@ export default function GamePage() {
       setCurrentPlayerId(playerId);
       setPlayers(updatedPlayers.filter((p, i, arr) => arr.findIndex(x => x.name === p.name) === i));
       setAnswers([]);
+      setTurnStartedAt(0);
+      setTimeLeft(30);
       setHasAnswered(false);
       setTimeout(() => { setShowCorrectAnswer(false); setPlayerAnswer(''); }, 3000);
     };
 
-    const handleAnswerIncorrect = ({ playerName, answer, nextPlayerIndex, nextPlayerId, players: updatedPlayers }: { playerName: string, answer: string, nextPlayerIndex: number, nextPlayerId: string, players?: Player[] }) => {
+    const handleAnswerIncorrect = ({ playerName, answer, nextPlayerIndex, nextPlayerId, players: updatedPlayers, turnStartedAt: newTurnStartedAt }: { playerName: string, answer: string, nextPlayerIndex: number, nextPlayerId: string, players?: Player[], turnStartedAt?: number }) => {
       soundManager.play('answearWrong');
       setCurrentPlayerIndex(nextPlayerIndex);
       setCurrentPlayerId(nextPlayerId);
@@ -140,12 +203,19 @@ export default function GamePage() {
       setErrorPlayerName(playerName);
       setErrorAnswer(answer || '');
       setShowErrorAnswer(true);
-      // Turno permanece com o mesmo jogador, libera o input para nova tentativa
       setHasAnswered(false);
-      setTimeout(() => { setShowErrorAnswer(false); setErrorPlayerName(''); setErrorAnswer(''); }, 3000);
+      setTimeout(() => {
+        setShowErrorAnswer(false);
+        setErrorPlayerName('');
+        setErrorAnswer('');
+        if (newTurnStartedAt !== undefined) {
+          setTurnStartedAt(Date.now());
+          setTimeLeft(30);
+        }
+      }, 3200);
     };
 
-    const handleNextCard = ({ currentCard: card, currentPlayerIndex: index, currentPlayerId: playerId, players: updatedPlayers, currentCardIndex: cardIdx, totalCards: total }: { currentCard: Card, currentPlayerIndex: number, currentPlayerId: string, players?: Player[], currentCardIndex?: number, totalCards?: number }) => {
+    const handleNextCard = ({ currentCard: card, currentPlayerIndex: index, currentPlayerId: playerId, players: updatedPlayers, currentCardIndex: cardIdx, totalCards: total, turnStartedAt: newTurnStartedAt }: { currentCard: Card, currentPlayerIndex: number, currentPlayerId: string, players?: Player[], currentCardIndex?: number, totalCards?: number, turnStartedAt?: number }) => {
       revealedCluesCountRef.current = 0;
       setCurrentCard(card);
       setCurrentPlayerIndex(index);
@@ -158,6 +228,10 @@ export default function GamePage() {
       setShowErrorAnswer(false);
       setShowNobodyGuessed(false);
       setAnswers([]);
+      if (newTurnStartedAt !== undefined) {
+        setTurnStartedAt(newTurnStartedAt);
+        setTimeLeft(30);
+      }
       setHasAnswered(false);
       isRevealingRef.current = false;
     };
@@ -165,6 +239,8 @@ export default function GamePage() {
     const handleGameEnded = ({ ranking: finalRanking }: { ranking: Player[] }) => {
       localStorage.setItem('perfil_ranking', JSON.stringify(finalRanking));
       localStorage.setItem('perfil_isHost', isHostRef.current ? 'true' : 'false');
+      setTurnStartedAt(0);
+      setTimeLeft(30);
       router.push('/victory');
     };
 
@@ -174,7 +250,14 @@ export default function GamePage() {
       soundManager.play('noOneCorrect');
       setCorrectAnswerText(correctAnswer);
       setShowNobodyGuessed(true);
+      setTurnStartedAt(0);
+      setTimeLeft(30);
       setTimeout(() => setShowNobodyGuessed(false), 3000);
+    };
+
+    const handleAnswerSubmitted = () => {
+      setTurnStartedAt(0);
+      setTimeLeft(30);
     };
 
     const handleGameRestarted = () => { router.push('/lobby'); };
@@ -200,6 +283,7 @@ export default function GamePage() {
     socket.on('victory-state', handleGameEnded);
     socket.on('answers-updated', handleAnswersUpdated);
     socket.on('answer-revealed', handleAnswerRevealed);
+    socket.on('answer-submitted', handleAnswerSubmitted);
     socket.on('game-restarted', handleGameRestarted);
     socket.on('next-player', handleNextPlayer);
     socket.on('player-left', handlePlayerLeft);
@@ -217,12 +301,28 @@ export default function GamePage() {
       socket.off('victory-state');
       socket.off('answers-updated');
       socket.off('answer-revealed');
+      socket.off('answer-submitted', handleAnswerSubmitted);
       socket.off('game-restarted');
       socket.off('next-player', handleNextPlayer);
       socket.off('player-left', handlePlayerLeft);
       socket.off('connect', handleConnect);
     };
   }, [router]);
+
+  useEffect(() => {
+    if (turnStartedAt === 0) return;
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, 30 - (Date.now() - turnStartedAt) / 1000);
+      setTimeLeft(remaining);
+    }, 100);
+    return () => clearInterval(interval);
+  }, [turnStartedAt]);
+
+  useEffect(() => {
+    if (currentPlayerId === myId && !hasAnswered && timeLeft === 0 && turnStartedAt > 0) {
+      socketRef.current?.emit('pass-turn');
+    }
+  }, [timeLeft, currentPlayerId, myId, hasAnswered, turnStartedAt]);
 
   const handleRevealClue = () => {
     socketRef.current?.emit('pass-turn');
@@ -271,17 +371,6 @@ export default function GamePage() {
       </div>
     );
   }
-
-  // ── Modal helpers ──
-  const Modal = ({ children, borderColor }: { children: React.ReactNode, borderColor: string }) => (
-    <div className="fixed inset-0 flex items-center justify-center z-50 px-4"
-      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}>
-      <div className="glass rounded-2xl p-8 max-w-sm w-full text-center animate-bounce"
-        style={{ borderColor, borderWidth: 1 }}>
-        {children}
-      </div>
-    </div>
-  );
 
   // ── HOST view ──
   if (isHost) {
@@ -389,7 +478,10 @@ export default function GamePage() {
                           {isActive && <NavigateNextIcon fontSize="small" style={{ color: '#FDE68A' }} />}
                           {player.name}
                         </span>
-                        <span className="font-bold text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>{player.score}</span>
+                        <div className="flex items-center gap-2">
+                          {isActive && <CountdownRing timeLeft={timeLeft} visible={turnStartedAt > 0} />}
+                          <span className="font-bold text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>{player.score}</span>
+                        </div>
                       </div>
                     );
                   })}
@@ -543,6 +635,13 @@ export default function GamePage() {
                 })}
               </div>
             </div>
+
+            {turnStartedAt > 0 && (
+              <div className="panel rounded-2xl p-4 flex flex-col items-center gap-2">
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Tempo restante</p>
+                <CountdownRing timeLeft={timeLeft} visible={!hasAnswered} large />
+              </div>
+            )}
           </div>
 
           {/* Main: clue cards + answer */}
@@ -603,7 +702,8 @@ export default function GamePage() {
 
             {isMyTurn && revealedClueIndices.length < 10 && (
               <button onClick={handleRevealClue}
-                className="w-full mb-3 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:brightness-110"
+                disabled={hasAnswered}
+                className="w-full mb-3 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.25)', color: '#FED7AA' }}>
                 <NavigateNextIcon /> Passar a Vez
               </button>

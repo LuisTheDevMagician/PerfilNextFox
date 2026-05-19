@@ -9,6 +9,15 @@ export function getActiveSocketIds(): string[] {
   return Array.from(connections.keys());
 }
 
+gerenciadorJogo.setOnAutoPass(() => {
+  broadcast('clue-revealed', {
+    revealedClueIndices: gerenciadorJogo.getDicasReveladas(),
+    currentPlayerIndex: getIndiceJogadorTurno(),
+    currentPlayerId: getIdJogadorTurno(),
+    turnStartedAt: Date.now(),
+  });
+});
+
 function broadcast(event: string, data: any) {
   const msg = JSON.stringify({ event, data });
   for (const conn of connections.values()) {
@@ -106,6 +115,7 @@ function handleRequestGameState(socketId: string) {
         currentPlayerId: getIdJogadorTurno(),
         players: gerenciadorJogo.getJogadores(getActiveSocketIds()).map(mapJogadorParaFrontend),
         ...getCardCounter(),
+        turnStartedAt: gerenciadorJogo.getTurnStartedAt(),
       });
       sendTo(socketId, 'clue-revealed', {
         revealedClueIndices: gerenciadorJogo.getDicasReveladas(),
@@ -182,6 +192,7 @@ function handleStartGame(socketId: string) {
       currentPlayerId: getIdJogadorTurno(),
       players: gerenciadorJogo.getJogadores(getActiveSocketIds()).map(mapJogadorParaFrontend),
       ...getCardCounter(),
+      turnStartedAt: Date.now(),
     });
   } catch (e: any) {
     console.error('Erro em start-game:', e.message);
@@ -219,6 +230,7 @@ function handlePassTurn(socketId: string) {
         revealedClueIndices: gerenciadorJogo.getDicasReveladas(),
         currentPlayerIndex: getIndiceJogadorTurno(),
         currentPlayerId: getIdJogadorTurno(),
+        turnStartedAt: Date.now(),
       });
     }
   } catch (e: any) {
@@ -236,6 +248,8 @@ function handleSubmitAnswer(socketId: string, data: any) {
     }
     const resp = gerenciadorJogo.adicionarResposta(socketId, respostaValidada);
     if (resp) {
+      gerenciadorJogo.pausarTimerVez();
+      broadcast('answer-submitted', { playerId: socketId });
       const host = gerenciadorJogo.getJogadores(getActiveSocketIds()).find((j: any) => j.e_host);
       if (host) {
         sendTo(host.id_socket, 'new-answer', {
@@ -296,6 +310,7 @@ function handleValidateAnswer(socketId: string, data: any) {
               currentPlayerId: getIdJogadorTurno(),
               players: gerenciadorJogo.getJogadores(getActiveSocketIds()).map(mapJogadorParaFrontend),
               ...getCardCounter(),
+              turnStartedAt: Date.now(),
             });
           }
         }, 3000);
@@ -306,6 +321,7 @@ function handleValidateAnswer(socketId: string, data: any) {
           nextPlayerIndex: getIndiceJogadorTurno(),
           nextPlayerId: getIdJogadorTurno(),
           players: gerenciadorJogo.getJogadores(getActiveSocketIds()).map(mapJogadorParaFrontend),
+          turnStartedAt: Date.now(),
         });
       }
       const respostasAtuais = gerenciadorJogo.getRespostas();
@@ -344,6 +360,7 @@ function handleRevealAnswer(socketId: string) {
             currentPlayerIndex: getIndiceJogadorTurno(),
             currentPlayerId: getIdJogadorTurno(),
             ...getCardCounter(),
+            turnStartedAt: Date.now(),
           });
         }
       }, 3000);

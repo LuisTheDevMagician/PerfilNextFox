@@ -1,4 +1,4 @@
-export type SoundName = 'answearRight' | 'answearWrong' | 'revealClue' | 'sendButton' | 'victoryScreenSound' | 'passTurn' | 'noOneCorrect';
+export type SoundName = 'answearRight' | 'answearWrong' | 'revealClue' | 'sendButton' | 'victoryScreenSound' | 'passTurn' | 'noOneCorrect' | 'rolldice';
 
 const SOUND_PATHS: Record<SoundName, string> = {
   answearRight: '/sound/answearRight.mp3',
@@ -8,6 +8,7 @@ const SOUND_PATHS: Record<SoundName, string> = {
   victoryScreenSound: '/sound/victoryScreenSound.mp3',
   passTurn: '/sound/passTurn.mp3',
   noOneCorrect: '/sound/noOneCorrect.mp3',
+  rolldice: '/sound/rolldice.mp3',
 };
 
 class SoundManager {

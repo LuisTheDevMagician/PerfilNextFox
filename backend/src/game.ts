@@ -45,6 +45,9 @@ export class GerenciadorJogo {
   private jogoIniciado: boolean = false;
   private jogoEncerrado: boolean = false;
   private revelouEstaTurno: boolean = false;
+  private timerAutoPass: ReturnType<typeof setTimeout> | null = null;
+  private onAutoPassCallback: (() => void) | null = null;
+  private turnStartedAt: number = 0;
 
   constructor() {
     this.carregarSessaoAtiva();
@@ -75,6 +78,40 @@ export class GerenciadorJogo {
         this.jogadoresMap.set(`id:${jogador.id}`, jogador);
       }
     }
+  }
+
+  setOnAutoPass(callback: () => void): void {
+    this.onAutoPassCallback = callback;
+  }
+
+  pausarTimerVez(): void {
+    this.cancelarTimerVez();
+  }
+
+  getTurnStartedAt(): number {
+    return this.turnStartedAt;
+  }
+
+  private cancelarTimerVez(): void {
+    if (this.timerAutoPass !== null) {
+      clearTimeout(this.timerAutoPass);
+      this.timerAutoPass = null;
+    }
+    this.turnStartedAt = 0;
+  }
+
+  private iniciarTimerVez(): void {
+    this.cancelarTimerVez();
+    this.turnStartedAt = Date.now();
+    this.timerAutoPass = setTimeout(() => {
+      const socketId = this.getIdJogadorAtual();
+      if (socketId) {
+        this.passarVez(socketId);
+      } else {
+        this.proximoJogador();
+      }
+      this.onAutoPassCallback?.();
+    }, 32000);
   }
 
   criarSessao(nomeHost: string): number {
@@ -254,6 +291,7 @@ export class GerenciadorJogo {
     }
     
     this.atualizarSessao();
+    this.iniciarTimerVez();
     console.log('🎮 Jogo iniciado!');
     return true;
   }
@@ -304,6 +342,7 @@ export class GerenciadorJogo {
     queries.atualizarJogador(jogadores[proximoIdx].id, { eTurnoAtual: 1 });
     this.revelouEstaTurno = false;
     this.atualizarSessao();
+    this.iniciarTimerVez();
     console.log(`➡️ Vez passou para: ${jogadores[proximoIdx].nome_jogador}`);
   }
 
@@ -356,6 +395,7 @@ export class GerenciadorJogo {
       const cartaAtual = this.getCartaAtual();
       console.log(`✓ ${jogador.nome_jogador} acertou! +${casas} pontos`);
 
+      this.cancelarTimerVez();
       setTimeout(() => {
         this.proximaCarta();
       }, 3000);
@@ -370,12 +410,13 @@ export class GerenciadorJogo {
   }
 
   revelarResposta(): string | null {
+    this.cancelarTimerVez();
     if (!this.sessaoAtual) return null;
     const cartaAtual = this.getCartaAtual();
     if (!cartaAtual) return null;
 
     console.log(`📖 Host revelou a resposta: ${cartaAtual.nome}`);
-    
+
     setTimeout(() => {
       this.proximaCarta();
     }, 3000);
@@ -410,10 +451,12 @@ export class GerenciadorJogo {
 
     queries.limparRespostasSessao(this.sessaoAtual.id);
     this.atualizarSessao();
+    this.iniciarTimerVez();
     console.log(`🃏 Próxima carta: ${this.getCartaAtual()?.nome}`);
   }
 
   private encerrarJogo() {
+    this.cancelarTimerVez();
     this.jogoEncerrado = true;
     this.jogoIniciado = false;
 
@@ -599,9 +642,10 @@ export class GerenciadorJogo {
     this.sessaoAtual.esta_ativa = true; // manter a sessão ativa para jogar novamente
     this.sessaoAtual.id_jogador_atual = 0; // zerar quem é o jogador do turno
     this.atualizarSessao();
+    this.cancelarTimerVez();
 
     // NÃO remover a sessão atual
-    // this.sessaoAtual = null; 
+    // this.sessaoAtual = null;
     console.log('🔄 Jogo reiniciado na mesma sessão');
     return true;
   }
@@ -618,6 +662,7 @@ export class GerenciadorJogo {
   }
 
   limparTudo() {
+    this.cancelarTimerVez();
     this.jogadoresMap.clear();
     this.sessaoAtual = null;
     this.jogoIniciado = false;
