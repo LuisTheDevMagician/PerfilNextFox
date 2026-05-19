@@ -678,14 +678,9 @@ export class GerenciadorJogo {
     const allJogadores = queries.buscarJogadoresSessao(this.sessaoAtual?.id || 0);
     console.log('🔍 Todos os jogadores na sessão:', allJogadores.map((j: any) => ({ nome: j.nome_jogador, sessionId: j.session_id, idSocket: j.id_socket })));
     
-    const jogadorExistente = queries.buscarJogadorPorSessionId(sessionId);
+    const jogadorExistente = allJogadores.find((j: any) => j.session_id === sessionId);
     if (!jogadorExistente) {
-      console.log('❌ Jogador não encontrado no banco com sessionId:', sessionId);
-      return null;
-    }
-    // Não reativar jogadores de sessões antigas
-    if (jogadorExistente.id_sessao !== this.sessaoAtual?.id) {
-      console.log('❌ SessionId pertence a sessão diferente:', jogadorExistente.id_sessao, '≠', this.sessaoAtual?.id);
+      console.log('❌ Jogador não encontrado na sessão atual com sessionId:', sessionId);
       return null;
     }
     // Não roubar a identidade de um jogador ainda conectado com outro socket
