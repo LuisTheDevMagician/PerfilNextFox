@@ -57,7 +57,7 @@ function CountdownRing({ timeLeft, visible, large = false }: { timeLeft: number;
   const size = large ? 68 : 46;
   const cx = size / 2;
   const circumference = 2 * Math.PI * r;
-  const dashoffset = circumference * (1 - Math.min(timeLeft, 30) / 30);
+  const dashoffset = circumference * (1 - Math.min(timeLeft, 40) / 40);
   const isUrgent = timeLeft <= 10;
   const color = isUrgent ? '#EF4444' : '#C4B5FD';
 
@@ -115,7 +115,7 @@ export default function GamePage() {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [totalCards, setTotalCards] = useState(0);
   const [turnStartedAt, setTurnStartedAt] = useState<number>(0);
-  const [timeLeft, setTimeLeft] = useState<number>(30);
+  const [timeLeft, setTimeLeft] = useState<number>(40);
   const isRevealingRef = useRef(false);
   const revealedCluesCountRef = useRef(0);
 
@@ -144,7 +144,7 @@ export default function GamePage() {
       setShowNobodyGuessed(false);
       if (newTurnStartedAt !== undefined) {
         setTurnStartedAt(newTurnStartedAt);
-        setTimeLeft(30);
+        setTimeLeft(40);
       }
       setIsLoading(false);
       const currentId = socket.id;
@@ -157,7 +157,7 @@ export default function GamePage() {
     const handleClueRevealed = ({ revealedClueIndices: newRevealed, currentPlayerIndex: newIndex, currentPlayerId: newPlayerId, players: updatedPlayers, turnStartedAt: newTurnStartedAt }: { revealedClueIndices: number[], currentPlayerIndex: number, currentPlayerId: string, players?: Player[], turnStartedAt?: number }) => {
       if (newTurnStartedAt !== undefined) {
         setTurnStartedAt(newTurnStartedAt);
-        setTimeLeft(30);
+        setTimeLeft(40);
       }
       if (newRevealed.length > revealedCluesCountRef.current) {
         soundManager.play('revealClue');
@@ -190,7 +190,7 @@ export default function GamePage() {
       setPlayers(updatedPlayers.filter((p, i, arr) => arr.findIndex(x => x.name === p.name) === i));
       setAnswers([]);
       setTurnStartedAt(0);
-      setTimeLeft(30);
+      setTimeLeft(40);
       setHasAnswered(false);
       setTimeout(() => { setShowCorrectAnswer(false); setPlayerAnswer(''); }, 3000);
     };
@@ -210,7 +210,7 @@ export default function GamePage() {
         setErrorAnswer('');
         if (newTurnStartedAt !== undefined) {
           setTurnStartedAt(Date.now());
-          setTimeLeft(30);
+          setTimeLeft(40);
         }
       }, 3200);
     };
@@ -230,7 +230,7 @@ export default function GamePage() {
       setAnswers([]);
       if (newTurnStartedAt !== undefined) {
         setTurnStartedAt(newTurnStartedAt);
-        setTimeLeft(30);
+        setTimeLeft(40);
       }
       setHasAnswered(false);
       isRevealingRef.current = false;
@@ -240,7 +240,7 @@ export default function GamePage() {
       localStorage.setItem('perfil_ranking', JSON.stringify(finalRanking));
       localStorage.setItem('perfil_isHost', isHostRef.current ? 'true' : 'false');
       setTurnStartedAt(0);
-      setTimeLeft(30);
+      setTimeLeft(40);
       router.push('/victory');
     };
 
@@ -251,13 +251,13 @@ export default function GamePage() {
       setCorrectAnswerText(correctAnswer);
       setShowNobodyGuessed(true);
       setTurnStartedAt(0);
-      setTimeLeft(30);
+      setTimeLeft(40);
       setTimeout(() => setShowNobodyGuessed(false), 3000);
     };
 
     const handleAnswerSubmitted = () => {
       setTurnStartedAt(0);
-      setTimeLeft(30);
+      setTimeLeft(40);
     };
 
     const handleGameRestarted = () => { router.push('/lobby'); };
@@ -268,7 +268,7 @@ export default function GamePage() {
       if (updatedPlayers) setPlayers(updatedPlayers.filter((p, i, arr) => arr.findIndex(x => x.name === p.name) === i));
     };
 
-    const handlePlayerLeft = ({ playerId, players: updatedPlayers }: { playerId: string, players: Player[] }) => {
+    const handlePlayerLeft = ({ players: updatedPlayers }: { playerId: string, players: Player[] }) => {
       setPlayers(updatedPlayers.filter((p, i, arr) => arr.findIndex(x => x.name === p.name) === i));
     };
 
@@ -312,7 +312,7 @@ export default function GamePage() {
   useEffect(() => {
     if (turnStartedAt === 0) return;
     const interval = setInterval(() => {
-      const remaining = Math.max(0, 30 - (Date.now() - turnStartedAt) / 1000);
+      const remaining = Math.max(0, 40 - (Date.now() - turnStartedAt) / 1000);
       setTimeLeft(remaining);
     }, 100);
     return () => clearInterval(interval);

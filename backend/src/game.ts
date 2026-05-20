@@ -111,7 +111,7 @@ export class GerenciadorJogo {
         this.proximoJogador();
       }
       this.onAutoPassCallback?.();
-    }, 32000);
+    }, 42000);
   }
 
   criarSessao(nomeHost: string): number {
@@ -193,7 +193,7 @@ export class GerenciadorJogo {
   }
 
   adicionarJogador(idSocket: string, sessionId: string, nome: string): Jogador | null {
-    if (this.getJogadores().length >= 11) {
+    if (this.getJogadores().length >= 9) {
       return null;
     }
     const existing = this.getJogadorPorNome(nome);
@@ -737,7 +737,7 @@ export class GerenciadorJogo {
       return reativado;
     }
 
-    if (this.jogadoresMap.size >= 11) {
+    if (this.jogadoresMap.size >= 9) {
       return null;
     }
 

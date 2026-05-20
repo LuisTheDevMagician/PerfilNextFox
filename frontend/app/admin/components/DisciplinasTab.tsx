@@ -2,126 +2,170 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  Button, IconButton, TextField, Dialog, DialogTitle, DialogContent, DialogActions,
-  Box, Typography,
+  Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Paper, IconButton,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import SchoolIcon from '@mui/icons-material/School';
+import TopicIcon from '@mui/icons-material/Topic';
+import StyleIcon from '@mui/icons-material/Style';
 
-interface Disciplina {
-  id: number;
-  nome: string;
-}
+interface Disciplina { id: number; nome: string; }
+interface Tema { id: number; disciplina_id: number; }
+interface Carta { id: number; disciplina_id: number; }
 
-const API_URL = 'http://localhost:3001/api';
+const API = 'http://localhost:3001/api';
 
 export function DisciplinasTab() {
   const [disciplinas, setDisciplinas] = useState<Disciplina[]>([]);
+  const [temas, setTemas] = useState<Tema[]>([]);
+  const [cartas, setCartas] = useState<Carta[]>([]);
   const [open, setOpen] = useState(false);
   const [editando, setEditando] = useState<Disciplina | null>(null);
   const [nome, setNome] = useState('');
 
-  const fetchDisciplinas = async () => {
-    const res = await fetch(`${API_URL}/disciplinas`);
-    setDisciplinas(await res.json());
+  const fetchData = async () => {
+    const [dRes, tRes, cRes] = await Promise.all([
+      fetch(`${API}/disciplinas`), fetch(`${API}/temas`), fetch(`${API}/cartas`),
+    ]);
+    setDisciplinas(await dRes.json());
+    setTemas(await tRes.json());
+    setCartas(await cRes.json());
   };
 
-  useEffect(() => {
-    fetchDisciplinas();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleSalvar = async () => {
+    if (!nome.trim()) return;
     const method = editando ? 'PUT' : 'POST';
-    const url = editando ? `${API_URL}/disciplinas/${editando.id}` : `${API_URL}/disciplinas`;
-    await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome }),
-    });
-    setOpen(false);
-    setNome('');
-    setEditando(null);
-    fetchDisciplinas();
+    const url = editando ? `${API}/disciplinas/${editando.id}` : `${API}/disciplinas`;
+    await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome }) });
+    setOpen(false); setNome(''); setEditando(null); fetchData();
   };
 
   const handleExcluir = async (id: number) => {
-    if (confirm('Excluir esta disciplina? Isso também excluirá todos os temas e cartas vinculados.')) {
-      await fetch(`${API_URL}/disciplinas/${id}`, { method: 'DELETE' });
-      fetchDisciplinas();
+    if (confirm('Excluir esta disciplina? Todos os temas e cartas vinculados serão removidos.')) {
+      await fetch(`${API}/disciplinas/${id}`, { method: 'DELETE' }); fetchData();
     }
   };
 
+  const countTemas = (id: number) => temas.filter(t => t.disciplina_id === id).length;
+  const countCartas = (id: number) => cartas.filter(c => c.disciplina_id === id).length;
+
   return (
-    <Box>
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6" sx={{ fontFamily: 'var(--font-display)', letterSpacing: '0.06em', color: 'rgba(255,255,255,0.9)', fontSize: '1.25rem' }}>
-          Gerenciar Disciplinas
-        </Typography>
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 28 }}>
+        <div>
+          <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '1.4rem', letterSpacing: '0.06em', color: '#fff' }}>
+            Matérias
+          </h2>
+          <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)' }}>
+            {disciplinas.length} {disciplinas.length === 1 ? 'disciplina cadastrada' : 'disciplinas cadastradas'}
+          </p>
+        </div>
         <Button
-          variant="contained"
-          startIcon={<AddIcon />}
+          variant="contained" startIcon={<AddIcon />}
           onClick={() => { setEditando(null); setNome(''); setOpen(true); }}
-          sx={{ bgcolor: '#7C3AED', '&:hover': { bgcolor: '#6D28D9' } }}
+          sx={{ bgcolor: '#7C3AED', '&:hover': { bgcolor: '#6D28D9' }, fontFamily: 'var(--font-body)', fontWeight: 700, borderRadius: '10px', textTransform: 'none', fontSize: '0.85rem' }}
         >
-          Nova Disciplina
+          Nova Matéria
         </Button>
-      </Box>
+      </div>
 
-      <TableContainer component={Paper} sx={{ bgcolor: 'rgba(14,14,26,0.95)', border: '1px solid rgba(255,255,255,0.07)' }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ bgcolor: 'rgba(255,255,255,0.03)' }}>
-              <TableCell sx={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, borderColor: 'rgba(255,255,255,0.07)' }}>ID</TableCell>
-              <TableCell sx={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, borderColor: 'rgba(255,255,255,0.07)' }}>Nome</TableCell>
-              <TableCell align="right" sx={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, borderColor: 'rgba(255,255,255,0.07)' }}>Ações</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {disciplinas.map((d) => (
-              <TableRow key={d.id} sx={{ '&:hover': { bgcolor: 'rgba(255,255,255,0.02)' } }}>
-                <TableCell sx={{ color: 'rgba(255,255,255,0.4)', borderColor: 'rgba(255,255,255,0.05)' }}>{d.id}</TableCell>
-                <TableCell sx={{ color: 'rgba(255,255,255,0.85)', borderColor: 'rgba(255,255,255,0.05)' }}>{d.nome}</TableCell>
-                <TableCell align="right" sx={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-                  <IconButton onClick={() => { setEditando(d); setNome(d.nome); setOpen(true); }} sx={{ color: 'rgba(255,255,255,0.5)', '&:hover': { color: '#C4B5FD' } }}>
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton onClick={() => handleExcluir(d.id)} sx={{ color: 'rgba(255,255,255,0.5)', '&:hover': { color: '#EF4444' } }}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-            {disciplinas.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={3} align="center" sx={{ py: 4, color: 'rgba(255,255,255,0.25)', borderColor: 'rgba(255,255,255,0.05)' }}>
-                  Nenhuma disciplina encontrada
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {disciplinas.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '80px 0', color: 'rgba(255,255,255,0.18)' }}>
+          <SchoolIcon sx={{ fontSize: 52, display: 'block', margin: '0 auto 12px', opacity: 0.4 }} />
+          <p style={{ margin: 0, fontSize: '0.85rem' }}>Nenhuma disciplina cadastrada ainda</p>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
+          {disciplinas.map((d) => (
+            <Paper
+              key={d.id}
+              sx={{
+                background: 'rgba(14,14,26,0.97)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: '14px',
+                overflow: 'hidden',
+                position: 'relative',
+                transition: 'border-color 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  borderColor: 'rgba(124,58,237,0.45)',
+                  boxShadow: '0 0 28px rgba(124,58,237,0.13)',
+                  '& .stripe': { opacity: 1 },
+                },
+              }}
+            >
+              <div className="stripe" style={{
+                height: 3, background: 'linear-gradient(90deg, #7C3AED 0%, #A78BFA 100%)',
+                opacity: 0.5, transition: 'opacity 0.2s',
+              }} />
+              <div style={{ padding: '18px 18px 16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
+                  <div style={{
+                    width: 42, height: 42, borderRadius: 11,
+                    background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.22)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <SchoolIcon sx={{ fontSize: 21, color: '#A78BFA' }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 2 }}>
+                    <IconButton size="small" onClick={() => { setEditando(d); setNome(d.nome); setOpen(true); }}
+                      sx={{ color: 'rgba(255,255,255,0.28)', '&:hover': { color: '#C4B5FD', background: 'rgba(196,181,253,0.08)' } }}>
+                      <EditIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                    <IconButton size="small" onClick={() => handleExcluir(d.id)}
+                      sx={{ color: 'rgba(255,255,255,0.28)', '&:hover': { color: '#F87171', background: 'rgba(248,113,113,0.08)' } }}>
+                      <DeleteIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </div>
+                </div>
 
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle sx={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.07)', pb: 2 }}>
+                <p style={{ margin: '0 0 16px', fontSize: '1.05rem', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-display)', letterSpacing: '0.02em', lineHeight: 1.3 }}>
+                  {d.nome}
+                </p>
+
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 14, display: 'flex', gap: 14 }}>
+                  <Stat icon={<TopicIcon sx={{ fontSize: 14, color: '#C4B5FD' }} />} value={countTemas(d.id)} label="tema" color="#C4B5FD" />
+                  <div style={{ width: 1, background: 'rgba(255,255,255,0.07)' }} />
+                  <Stat icon={<StyleIcon sx={{ fontSize: 14, color: '#A78BFA' }} />} value={countCartas(d.id)} label="carta" color="#A78BFA" />
+                </div>
+              </div>
+            </Paper>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle sx={{ color: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(255,255,255,0.07)', pb: 2, fontFamily: 'var(--font-display)', letterSpacing: '0.04em' }}>
           {editando ? 'Editar' : 'Nova'} Disciplina
         </DialogTitle>
-        <DialogContent sx={{ pt: '16px !important' }}>
-          <TextField
-            autoFocus
-            fullWidth
-            label="Nome"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-          />
+        <DialogContent sx={{ pt: '20px !important' }}>
+          <TextField autoFocus fullWidth label="Nome da disciplina" value={nome}
+            onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSalvar()} />
         </DialogContent>
         <DialogActions sx={{ borderTop: '1px solid rgba(255,255,255,0.07)', px: 3, py: 2 }}>
-          <Button onClick={() => setOpen(false)} sx={{ color: 'rgba(255,255,255,0.5)' }}>Cancelar</Button>
-          <Button onClick={handleSalvar} variant="contained" sx={{ bgcolor: '#7C3AED', '&:hover': { bgcolor: '#6D28D9' } }}>Salvar</Button>
+          <Button onClick={() => setOpen(false)} sx={{ color: 'rgba(255,255,255,0.45)', textTransform: 'none' }}>Cancelar</Button>
+          <Button onClick={handleSalvar} variant="contained" sx={{ bgcolor: '#7C3AED', '&:hover': { bgcolor: '#6D28D9' }, textTransform: 'none', borderRadius: '8px' }}>Salvar</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </div>
+  );
+}
+
+function Stat({ icon, value, label, color }: { icon: React.ReactNode; value: number; label: string; color: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+      <div style={{ width: 28, height: 28, borderRadius: 8, background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {icon}
+      </div>
+      <div>
+        <p style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color, lineHeight: 1 }}>{value}</p>
+        <p style={{ margin: '2px 0 0', fontSize: '0.62rem', color: 'rgba(255,255,255,0.32)', lineHeight: 1, letterSpacing: '0.03em' }}>
+          {label}{value !== 1 ? 's' : ''}
+        </p>
+      </div>
+    </div>
   );
 }

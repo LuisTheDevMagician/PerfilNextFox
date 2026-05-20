@@ -282,7 +282,7 @@ export const queries = {
 
   buscarTodasCartas: () => {
     const stmt = sqlite.prepare(`
-      SELECT c.*, t.nome as tema_nome, d.nome as disciplina_nome
+      SELECT c.*, t.nome as tema_nome, d.nome as disciplina_nome, d.id as disciplina_id
       FROM cartas c
       LEFT JOIN temas t ON c.tema_id = t.id
       LEFT JOIN disciplinas d ON t.disciplina_id = d.id

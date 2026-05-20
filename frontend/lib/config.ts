@@ -6,7 +6,7 @@
 
 export const GAME_CONFIG = {
   // Número máximo de jogadores permitidos
-  MAX_PLAYERS: 11,
+  MAX_PLAYERS: 9,
   
   // Tempo em milissegundos para mostrar a resposta correta antes de avançar
   CORRECT_ANSWER_DISPLAY_TIME: 3000,
