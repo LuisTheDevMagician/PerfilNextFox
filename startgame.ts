@@ -1,4 +1,22 @@
 import { spawn } from 'bun';
+import { existsSync } from 'node:fs';
+
+async function ensureInstalled(label: 'backend' | 'frontend') {
+  const dir = `${import.meta.dir}/${label}`;
+  if (!existsSync(`${dir}/node_modules`)) {
+    console.log(`\x1b[33m[install] node_modules não encontrado em ${label}/ — rodando bun install...\x1b[0m`);
+    const proc = spawn(['bun', 'install'], { cwd: dir, stdout: 'inherit', stderr: 'inherit' });
+    const code = await proc.exited;
+    if (code !== 0) {
+      console.error(`\x1b[31m[install] Falha ao instalar dependências do ${label} (código ${code})\x1b[0m`);
+      process.exit(1);
+    }
+    console.log(`\x1b[32m[install] ${label} — dependências instaladas!\x1b[0m`);
+  }
+}
+
+await ensureInstalled('backend');
+await ensureInstalled('frontend');
 
 const colors = { backend: '\x1b[35m', frontend: '\x1b[36m', reset: '\x1b[0m' };
 
