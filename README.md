@@ -47,6 +47,7 @@ Para substituir um som, basta trocar o `.mp3` correspondente mantendo o mesmo no
 
 - **Frontend**: Next.js 16+ (App Router), TypeScript, Tailwind CSS 4, Material UI / Icons.
 - **Backend**: Bun runtime, Elysia 1.x, WebSocket nativo do Bun.
+- **Banco de Dados**: SqLite e Drizzle ORM.
 - **Gerenciador de Pacotes Oficial**: Bun.
 
 ---
@@ -135,7 +136,21 @@ Você pode conferir detalhes simplificados das normativas no arquivo formal `LIC
 
 ## 👨‍💻 Feito para Divertir
 
-*(Desenvolvido em Next.js | Dezembro 2025/Abril 2026).*
+Desenvolvido por:
+
+ **[LuisTheDevMagician - Luis Eduardo](https://github.com/LuisTheDevMagician)**  - Aluno - Análise e Desenvolvimento de Sistemas - Módulo V - IFPI - Campus Corrente
+
+ Guilherme - Aluno - Análise e Desenvolvimento de Sistemas - Módulo V - IFPI - Campus Corrente
+
+ Phaola - Aluna - Análise e Desenvolvimento de Sistemas - Módulo V - IFPI - Campus Corrente
+
+
+ Karl - Professor - Análise e Desenvolvimento de Sistemas - Módulo V - IFPI - Campus Corrente
+ 
+ 
+ *(Next.js 16+, TypeScript, Tailwind CSS 4, Bun, Elysia, WebSocket, Drizzle ORM | Dezembro 2025/Abril 2026).*
+
+
 Boa sorte e que desbanquem logo essa Entidade! 🏆🎮
 
 ---
