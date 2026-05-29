@@ -1,15 +1,22 @@
 # 🎮 Jogo Perfil - Quiz Multiplayer
 
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20NC%201.0-blue)](https://polyformproject.org/licenses/noncommercial/1.0.0)
+
 Jogo web multiplayer local estilo "Perfil" (jogo de adivinhação com dicas progressivas) com arquitetura separada em **Backend** (Bun + Elysia) e **Frontend** (Next.js 16+). Suporta até 9 jogadores simultâneos em tempo real via rede local.
 
 ---
 
 ## 📋 Sobre o Jogo
 
-O **Jogo Perfil** é um quiz de adivinhação divertido e educacional onde:
+O **Jogo PerfilNextFox** é um quiz de adivinhação divertido e educacional onde:
 - Uma **ENTIDADE: Carta** A resposta correta precisa ser descoberta através de **10 DICAS** progressivas.
 - Há um **HOST** (mestre do jogo) que vê todas as informações da carta (dicas, resposta, controle do jogo).
 - Os demais **JOGADORES** (até 8) veem apenas as dicas sendo reveladas, o contador de tempo e a pontuação em jogo em tempo real.
+
+**Logo do Game**:
+
+
+![Logo do Game](images/logo.png)
 
 ### 🆕 Mecânicas e Regras Atualizadas
 - **Pontos Dinâmicos Decrescentes:** A carta começa valendo **10 pontos** de Acerto (mesmo que se revele a dica 0 e a dica 1). A cada dica adicional revelada pelo mestre (da 2ª à 10ª), a pontuação decresce sucessivamente até o piso natural de **1 ponto**.
@@ -47,6 +54,7 @@ Para substituir um som, basta trocar o `.mp3` correspondente mantendo o mesmo no
 
 - **Frontend**: Next.js 16+ (App Router), TypeScript, Tailwind CSS 4, Material UI / Icons.
 - **Backend**: Bun runtime, Elysia 1.x, WebSocket nativo do Bun.
+- **Banco de Dados**: SqLite e Drizzle ORM.
 - **Gerenciador de Pacotes Oficial**: Bun.
 
 ---
@@ -125,86 +133,188 @@ Você pode rodar tudo no seu PC (Mestre) e os convidados entram pelo celular ou 
 
 ---
 
-## 📄 Licença e Tipificação
+## 📄 Licença
 
-Este projeto é ofertado segundo a rigorosa padronização internacional Creative Commons **Attribution-NonCommercial 4.0 International Public License (CC BY-NC 4.0)**. O material, fonte, arquitetura e propósitos garantem utilização didática, livre estudo, seminários e testes. O uso voltado a meios de arrecadação financeira é defeso e vetado.
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20NC%201.0-blue)](https://polyformproject.org/licenses/noncommercial/1.0.0)
 
-Você pode conferir detalhes simplificados das normativas no arquivo formal `LICENSE` repousado na respectiva folha base do projeto.
+Este projeto está licenciado sob a **PolyForm Noncommercial License 1.0.0**. É permitido usar, copiar, modificar e distribuir o software para fins não comerciais (estudos, pesquisa, projetos pessoais, uso educacional). O uso com fins comerciais é proibido.
+
+Consulte o arquivo [`LICENSE`](LICENSE) para o texto completo.
 
 ---
 
 ## 👨‍💻 Feito para Divertir
 
-*(Desenvolvido em Next.js | Dezembro 2025/Abril 2026).*
+Desenvolvido por:
+
+ **[LuisTheDevMagician - Luis Eduardo](https://github.com/LuisTheDevMagician)**  - Aluno - Análise e Desenvolvimento de Sistemas - Módulo V - IFPI - Campus Corrente
+
+ Guilherme - Aluno - Análise e Desenvolvimento de Sistemas - Módulo V - IFPI - Campus Corrente
+
+ Phaola - Aluna - Análise e Desenvolvimento de Sistemas - Módulo V - IFPI - Campus Corrente
+
+
+ Karl - Professor - Análise e Desenvolvimento de Sistemas - Módulo V - IFPI - Campus Corrente
+ 
+ 
+ *(Next.js 16+, TypeScript, Tailwind CSS 4, Bun, Elysia, WebSocket, Drizzle ORM | Dezembro 2025/Abril 2026).*
+
+
 Boa sorte e que desbanquem logo essa Entidade! 🏆🎮
 
 ---
 
 # Telas do jogo
 
+## Telas Antigas - Protótipo Inicial de Alta Fidelidade
+
+### Tela Inicial — PC e Smartphone
+
+![Tela Inicial PC](images/telasPrototipoInicial/telaInicialPc.png)
+
+![Tela Inicial Smartphone](images/telasPrototipoInicial/telaInicialSp.png)
+
+### Lobby — Visão Host (PC e Smartphone)
+
+![Lobby Host PC 0](images/telasPrototipoInicial/telaLobbyPcHost0.png)
+
+![Lobby Host PC 1](images/telasPrototipoInicial/telaLobbyPcHost1.png)
+
+![Lobby Host Smartphone 1](images/telasPrototipoInicial/telaLobbySpHost1.png)![Lobby Host Smartphone 2](images/telasPrototipoInicial/telaLobbySpHost2.png)
 
 
-## Telas Antigas - Prótipo Inicial de Alta Fidelidade
+### Lobby — Visão Jogador (PC e Smartphone)
 
-### Tela Inicial PC e Smartphone
+![Lobby Jogador PC](images/telasPrototipoInicial/telaLobbyPcJogador.png)
 
-<img width="1920" height="889" alt="image" src="https://github.com/user-attachments/assets/2adb9b75-f1d4-43c6-ac64-a8ca6bd7a1a9" />
+![Lobby Jogador Smartphone](images/telasPrototipoInicial/telaLobbySpJogador.png)
 
-<img width="402" height="804" alt="image" src="https://github.com/user-attachments/assets/e8ae13b4-fb93-4269-af6a-249511e7dc28" />
+### Jogo — Visão Host Smartphone
 
+![Jogo Host Smartphone 2](images/telasPrototipoInicial/telaJogoSpHost2.png)![Jogo Host Smartphone](images/telasPrototipoInicial/telaJogoSpHost.png)![Jogo Host Smartphone - Resposta Recebida](images/telasPrototipoInicial/telaJogoSpHostRespostaRecebida.png)
 
-### Tela do Lobby PC e Smartphone - Visão Host
+### Jogo — Visão Jogador (PC e Smartphone)
 
-<img width="1915" height="891" alt="image" src="https://github.com/user-attachments/assets/74c4ed73-d3b7-4d37-bce8-1b6299931cf7" />
+![Jogo Jogador PC na Vez](images/telasPrototipoInicial/telaJogoPcVezDoJogador.png)
 
-
-<img width="402" height="804" alt="image" src="https://github.com/user-attachments/assets/bf4a9a00-a84b-485d-89c0-fa7b971b5273" />
-
-
-### Tela do Lobby PC e Smartphone - Visão Jogador
-
-<img width="1915" height="891" alt="image" src="https://github.com/user-attachments/assets/cf306523-63a4-4f60-bd57-72b38147a0c0" />
-
-<img width="402" height="811" alt="image" src="https://github.com/user-attachments/assets/73bd58a5-8840-4a74-b8ce-765a4857f21a" />
-
-### Tela do jogo PC e Smartphone - Visão Host
-
-<img width="1920" height="894" alt="image" src="https://github.com/user-attachments/assets/08ccfe98-88fc-499e-b310-5d4082afd0f6" />
-
-<img width="405" height="808" alt="image" src="https://github.com/user-attachments/assets/3581d56b-d6a6-4b5e-b4c8-e293a0df845c" /> <img width="405" height="808" alt="image" src="https://github.com/user-attachments/assets/850777a8-b409-4d7c-bbf5-c5c403bb6623" />
-
-### Tela do jogo PC e Smartphone - Visão Jogador
+![Jogo Jogador Smartphone 1](images/telasPrototipoInicial/telaJogoSpJogador1.png)![Jogo Jogador Smartphone na Vez 2](images/telasPrototipoInicial/telaJogoSpVezDoJogador2.png)![Jogo Jogador Smartphone fora da Vez](images/telasPrototipoInicial/telaJogSpJogadorNaoeAVezDele.png)
 
 
-<img width="1915" height="895" alt="image" src="https://github.com/user-attachments/assets/b3012795-8837-4012-9515-593bcb26f654" />
+### Resposta Correta
 
-<img width="405" height="808" alt="image" src="https://github.com/user-attachments/assets/14084010-ae3d-483e-b00a-e3a6a76afe90" /> <img width="405" height="808" alt="image" src="https://github.com/user-attachments/assets/1ba7cf59-fb63-4ee1-b8e6-4231051b4011" />
+![Resposta Correta](images/telasPrototipoInicial/telaRespostaCorreta.png)
 
-### Tela de Resposta Correta
+### Resposta Errada
 
-<img width="1913" height="887" alt="image" src="https://github.com/user-attachments/assets/2d6ae6f2-7498-4b24-84d6-a9be4ad58141" />
+![Resposta Errada](images/telasPrototipoInicial/telaRespostaErrada.png)
 
-### Tela de Resposta Errada
+### Ninguém Acertou — Visão Host PC e Alerta Geral
 
-<img width="1913" height="887" alt="image" src="https://github.com/user-attachments/assets/8c93dcc6-9bde-47eb-aee4-c4fb005d41c3" />
+![Host PC quando ninguém acerta](images/telasPrototipoInicial/telaHostPcQuandoNinguemAcerta.png)
 
-### Tela de Quando nenhum jogador acerta e host revla a Resposta
+![Ninguém Acertou](images/telasPrototipoInicial/telaNinguemAcertou.png)
 
-<img width="1913" height="887" alt="image" src="https://github.com/user-attachments/assets/e3833700-71c8-4e02-8465-7a4914ddec1e" />
+### Tela de Vitória — Visão Host (PC e Smartphone)
 
-<img width="1913" height="887" alt="image" src="https://github.com/user-attachments/assets/57f50d44-2d85-4eb1-8b8b-f86c767d7e7c" />
+![Vitória Host PC](images/telasPrototipoInicial/telaVitoriaPcHost.png)
 
-### Tela de Vitória - Visão Host
+![Vitória Host Smartphone](images/telasPrototipoInicial/telaVitoriaSpHost.png)
 
-<img width="1913" height="887" alt="image" src="https://github.com/user-attachments/assets/81f1f260-7854-401f-a601-490b11794b7e" />
+### Tela de Vitória — Visão Jogador (PC e Smartphone)
 
-<img width="403" height="801" alt="image" src="https://github.com/user-attachments/assets/0170f4b5-4320-42f0-994d-565de8d69f4d" />
+![Vitória Jogador PC](images/telasPrototipoInicial/telaVitoriaPcJogador.png)
 
-### Tela de Vitória - Visão Jogador
+![Vitória Jogador Smartphone](images/telasPrototipoInicial/telaVitoriaSpJogador.png)
 
-<img width="1911" height="894" alt="image" src="https://github.com/user-attachments/assets/3daf4a9c-c98d-4a82-b106-0ed294a44ce1" />
+### Painel Administrador — CRUD
 
-<img width="403" height="801" alt="image" src="https://github.com/user-attachments/assets/5f9c91d9-d40e-41b4-9c5b-f4a7d9f0b393" />
+![Painel Admin - Cartas](images/telasPrototipoInicial/telaPainelAdminCrudCartas.png)
+
+![Painel Admin - Disciplinas](images/telasPrototipoInicial/telaPainelAdminCrudDisciplinas.png)
+
+![Painel Admin - Temas](images/telasPrototipoInicial/telaPainelAdminCrudTemas.png)
+
+---
+
+## Telas da Versão Final
+
+### Tela Inicial — PC e Smartphone
+
+![Tela Inicial PC](images/telasVersaoFinal/telaInicialPc.png)
+
+![Tela Inicial Smartphone](images/telasVersaoFinal/telaInicialSp.png)
+
+### Lobby — Visão Host (PC e Smartphone)
+
+![Lobby Host PC](images/telasVersaoFinal/telaLobbyPcHost.png)
+
+![Lobby Host Smartphone](images/telasVersaoFinal/telaLobbySpJogador.png)
+
+### Lobby - Convidar Jogadores (Somente Host)
+
+![Lobby Convidar Jogadores](images/telasVersaoFinal/telaConvidarJogadoresSomenteHost.png)
+
+### Lobby — Visão Jogador (PC e Smartphone)
+
+![Lobby Jogador PC](images/telasVersaoFinal/telaLobbyPcJogador.png)
+
+![Lobby Jogador Smartphone](images/telasVersaoFinal/telaLobbySpHost.png)
+
+### Jogo — Visão Host PC
+
+![Jogo Host PC](images/telasVersaoFinal/telaJogoPcHost.png)
+
+### Jogo — Visão Host Smartphone
+
+![Jogo Host Smartphone](images/telasVersaoFinal/telaJogoSpHost.png) ![Jogo Host Smartphone - Resposta Recebida](images/telasVersaoFinal/telaJogoSpHostRespostaRecebida.png) ![Jogo Host Smartphone 2](images/telasVersaoFinal/telaJogoSpHost2.png)
+
+### Jogo — Visão Jogador PC (na vez e fora da vez)
+
+![Jogo Jogador PC na Vez](images/telasVersaoFinal/telaJogoJogadorPcNaVezDele.png)
+
+![Jogo Jogador PC fora da Vez](images/telasVersaoFinal/telaJogoPcJogadorQuandoNaoEAVezDele.png)
+
+### Jogo — Visão Jogador Smartphone (na vez e fora da vez)
+
+![Jogo Jogador Smartphone na Vez](images/telasVersaoFinal/telaJogoSpJogadorQuandoEAVezDele.png) ![Jogo Jogador Smartphone na Vez 2](images/telasVersaoFinal/telaJogoSpJogadorQuandoEAVezDele2.png) ![Jogo Jogador Smartphone fora da Vez](images/telasVersaoFinal/telaJogoSpJogadorQuandoNaoEAVezDele.png)
+
+### Resposta Recebida — PC
+
+![Resposta Recebida PC](images/telasVersaoFinal/telaRespostaRecebidaPc.png)
+
+### Resposta Correta
+
+![Resposta Correta](images/telasVersaoFinal/telaRespostaCorreta.png)
+
+### Resposta Errada
+
+![Resposta Errada](images/telasVersaoFinal/telaRespostaErrada.png)
+
+### Ninguém Acertou — Visão Host PC e Alerta Geral
+
+![Host PC quando ninguém acerta](images/telasVersaoFinal/telaDoHostPcQundoNinguemAcertaAResposta.png)
+
+![Ninguém Acertou](images/telasVersaoFinal/telaNinguemAcertou.png)
+
+### Tela de Vitória — Visão Host (PC e Smartphone)
+
+![Vitória Host PC](images/telasVersaoFinal/telaVitoriaPcHost.png)
+
+![Vitória Host Smartphone](images/telasVersaoFinal/telaVitoriaSpHost.png)
+
+### Tela de Vitória — Visão Jogador (PC e Smartphone)
+
+![Vitória Jogador PC](images/telasVersaoFinal/telaVitoriaPcJogador.png)
+
+![Vitória Jogador Smartphone](images/telasVersaoFinal/telaVitoriaSpJogador.png)
+
+### Painel Administrador — CRUD
+
+![Painel Admin - Cartas](images/telasVersaoFinal/telaPainelAdministradorCrudCartas.png)
+
+![Painel Admin - Disciplinas](images/telasVersaoFinal/telaPainelAdministradorCrudDisciplina.png)
+
+![Painel Admin - Temas](images/telasVersaoFinal/telaPainelAdministradorCrudTemas.png)
 
 
 
