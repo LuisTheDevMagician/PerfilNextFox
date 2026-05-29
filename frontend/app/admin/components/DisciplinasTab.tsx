@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Paper, IconButton,
 } from '@mui/material';
@@ -25,16 +25,16 @@ export function DisciplinasTab() {
   const [editando, setEditando] = useState<Disciplina | null>(null);
   const [nome, setNome] = useState('');
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const [dRes, tRes, cRes] = await Promise.all([
       fetch(`${API}/disciplinas`), fetch(`${API}/temas`), fetch(`${API}/cartas`),
     ]);
     setDisciplinas(await dRes.json());
     setTemas(await tRes.json());
     setCartas(await cRes.json());
-  };
+  }, []);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { void (async () => { await fetchData(); })(); }, [fetchData]);
 
   const handleSalvar = async () => {
     if (!nome.trim()) return;

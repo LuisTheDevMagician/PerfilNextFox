@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions,
   Paper, IconButton, Select, MenuItem, FormControl, InputLabel, Typography,
@@ -45,7 +45,7 @@ export function CartasTab() {
     });
   }, [cartas, filterDisc, filterTema]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const [cRes, tRes, dRes] = await Promise.all([
       fetch(`${API}/cartas`), fetch(`${API}/temas`), fetch(`${API}/disciplinas`),
     ]);
@@ -55,9 +55,9 @@ export function CartasTab() {
     })));
     setTemas(await tRes.json());
     setDisciplinas(await dRes.json());
-  };
+  }, []);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { void (async () => { await fetchData(); })(); }, [fetchData]);
 
   const handleAbrirEditor = (carta?: Carta) => {
     if (carta) {
@@ -256,7 +256,7 @@ function CartaCard({ carta, onEdit, onDelete }: { carta: Carta; onEdit: () => vo
         </p>
 
         <p style={{ margin: '0 0 12px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.32)', lineHeight: 1.45, fontStyle: 'italic', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-          "{previewDica}"
+          {`"${previewDica}"`}
         </p>
 
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 10, display: 'flex', gap: 6, flexWrap: 'wrap' }}>

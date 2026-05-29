@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions,
   Paper, IconButton, Select, MenuItem, FormControl, InputLabel,
@@ -35,16 +35,16 @@ export function TemasTab() {
   const [nome, setNome] = useState('');
   const [disciplinaId, setDisciplinaId] = useState<number>(0);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const [tRes, dRes, cRes] = await Promise.all([
       fetch(`${API}/temas`), fetch(`${API}/disciplinas`), fetch(`${API}/cartas`),
     ]);
     setTemas(await tRes.json());
     setDisciplinas(await dRes.json());
     setCartas(await cRes.json());
-  };
+  }, []);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { void (async () => { await fetchData(); })(); }, [fetchData]);
 
   const handleSalvar = async () => {
     if (!nome.trim() || !disciplinaId) return;
