@@ -142,73 +142,73 @@ Boa sorte e que desbanquem logo essa Entidade! 🏆🎮
 
 # Telas do jogo
 
-## Telas Atuais/Novas - Jogo Versão Final 100% Funcional
-
-
-
-
-
 ## Telas Antigas - Protótipo Inicial de Alta Fidelidade
 
-### Tela Inicial PC e Smartphone
+### Tela Inicial — PC e Smartphone
 
-<img width="1920" height="889" alt="image" src="https://github.com/user-attachments/assets/2adb9b75-f1d4-43c6-ac64-a8ca6bd7a1a9" />
+![Tela Inicial PC](images/telasPrototipoInicial/telaInicialPc.png)
 
-<img width="402" height="804" alt="image" src="https://github.com/user-attachments/assets/e8ae13b4-fb93-4269-af6a-249511e7dc28" />
+![Tela Inicial Smartphone](images/telasPrototipoInicial/telaInicialSp.png)
 
+### Lobby — Visão Host (PC e Smartphone)
 
-### Tela do Lobby PC e Smartphone - Visão Host
+![Lobby Host PC 0](images/telasPrototipoInicial/telaLobbyPcHost0.png)
 
-<img width="1915" height="891" alt="image" src="https://github.com/user-attachments/assets/74c4ed73-d3b7-4d37-bce8-1b6299931cf7" />
+![Lobby Host PC 1](images/telasPrototipoInicial/telaLobbyPcHost1.png)
 
-
-<img width="402" height="804" alt="image" src="https://github.com/user-attachments/assets/bf4a9a00-a84b-485d-89c0-fa7b971b5273" />
-
-
-### Tela do Lobby PC e Smartphone - Visão Jogador
-
-<img width="1915" height="891" alt="image" src="https://github.com/user-attachments/assets/cf306523-63a4-4f60-bd57-72b38147a0c0" />
-
-<img width="402" height="811" alt="image" src="https://github.com/user-attachments/assets/73bd58a5-8840-4a74-b8ce-765a4857f21a" />
-
-### Tela do jogo PC e Smartphone - Visão Host
-
-<img width="1920" height="894" alt="image" src="https://github.com/user-attachments/assets/08ccfe98-88fc-499e-b310-5d4082afd0f6" />
-
-<img width="405" height="808" alt="image" src="https://github.com/user-attachments/assets/3581d56b-d6a6-4b5e-b4c8-e293a0df845c" /> <img width="405" height="808" alt="image" src="https://github.com/user-attachments/assets/850777a8-b409-4d7c-bbf5-c5c403bb6623" />
-
-### Tela do jogo PC e Smartphone - Visão Jogador
+![Lobby Host Smartphone 1](images/telasPrototipoInicial/telaLobbySpHost1.png)![Lobby Host Smartphone 2](images/telasPrototipoInicial/telaLobbySpHost2.png)
 
 
-<img width="1915" height="895" alt="image" src="https://github.com/user-attachments/assets/b3012795-8837-4012-9515-593bcb26f654" />
+### Lobby — Visão Jogador (PC e Smartphone)
 
-<img width="405" height="808" alt="image" src="https://github.com/user-attachments/assets/14084010-ae3d-483e-b00a-e3a6a76afe90" /> <img width="405" height="808" alt="image" src="https://github.com/user-attachments/assets/1ba7cf59-fb63-4ee1-b8e6-4231051b4011" />
+![Lobby Jogador PC](images/telasPrototipoInicial/telaLobbyPcJogador.png)
 
-### Tela de Resposta Correta
+![Lobby Jogador Smartphone](images/telasPrototipoInicial/telaLobbySpJogador.png)
 
-<img width="1913" height="887" alt="image" src="https://github.com/user-attachments/assets/2d6ae6f2-7498-4b24-84d6-a9be4ad58141" />
+### Jogo — Visão Host Smartphone
 
-### Tela de Resposta Errada
+![Jogo Host Smartphone 2](images/telasPrototipoInicial/telaJogoSpHost2.png)![Jogo Host Smartphone](images/telasPrototipoInicial/telaJogoSpHost.png)![Jogo Host Smartphone - Resposta Recebida](images/telasPrototipoInicial/telaJogoSpHostRespostaRecebida.png)
 
-<img width="1913" height="887" alt="image" src="https://github.com/user-attachments/assets/8c93dcc6-9bde-47eb-aee4-c4fb005d41c3" />
+### Jogo — Visão Jogador (PC e Smartphone)
 
-### Tela de Quando nenhum jogador acerta e host revla a Resposta
+![Jogo Jogador PC na Vez](images/telasPrototipoInicial/telaJogoPcVezDoJogador.png)
 
-<img width="1913" height="887" alt="image" src="https://github.com/user-attachments/assets/e3833700-71c8-4e02-8465-7a4914ddec1e" />
+![Jogo Jogador Smartphone 1](images/telasPrototipoInicial/telaJogoSpJogador1.png)![Jogo Jogador Smartphone na Vez 2](images/telasPrototipoInicial/telaJogoSpVezDoJogador2.png)![Jogo Jogador Smartphone fora da Vez](images/telasPrototipoInicial/telaJogSpJogadorNaoeAVezDele.png)
 
-<img width="1913" height="887" alt="image" src="https://github.com/user-attachments/assets/57f50d44-2d85-4eb1-8b8b-f86c767d7e7c" />
 
-### Tela de Vitória - Visão Host
+### Resposta Correta
 
-<img width="1913" height="887" alt="image" src="https://github.com/user-attachments/assets/81f1f260-7854-401f-a601-490b11794b7e" />
+![Resposta Correta](images/telasPrototipoInicial/telaRespostaCorreta.png)
 
-<img width="403" height="801" alt="image" src="https://github.com/user-attachments/assets/0170f4b5-4320-42f0-994d-565de8d69f4d" />
+### Resposta Errada
 
-### Tela de Vitória - Visão Jogador
+![Resposta Errada](images/telasPrototipoInicial/telaRespostaErrada.png)
 
-<img width="1911" height="894" alt="image" src="https://github.com/user-attachments/assets/3daf4a9c-c98d-4a82-b106-0ed294a44ce1" />
+### Ninguém Acertou — Visão Host PC e Alerta Geral
 
-<img width="403" height="801" alt="image" src="https://github.com/user-attachments/assets/5f9c91d9-d40e-41b4-9c5b-f4a7d9f0b393" />
+![Host PC quando ninguém acerta](images/telasPrototipoInicial/telaHostPcQuandoNinguemAcerta.png)
+
+![Ninguém Acertou](images/telasPrototipoInicial/telaNinguemAcertou.png)
+
+### Tela de Vitória — Visão Host (PC e Smartphone)
+
+![Vitória Host PC](images/telasPrototipoInicial/telaVitoriaPcHost.png)
+
+![Vitória Host Smartphone](images/telasPrototipoInicial/telaVitoriaSpHost.png)
+
+### Tela de Vitória — Visão Jogador (PC e Smartphone)
+
+![Vitória Jogador PC](images/telasPrototipoInicial/telaVitoriaPcJogador.png)
+
+![Vitória Jogador Smartphone](images/telasPrototipoInicial/telaVitoriaSpJogador.png)
+
+### Painel Administrador — CRUD
+
+![Painel Admin - Cartas](images/telasPrototipoInicial/telaPainelAdminCrudCartas.png)
+
+![Painel Admin - Disciplinas](images/telasPrototipoInicial/telaPainelAdminCrudDisciplinas.png)
+
+![Painel Admin - Temas](images/telasPrototipoInicial/telaPainelAdminCrudTemas.png)
 
 ---
 
