@@ -1,4 +1,4 @@
-type Handler = (data: any) => void;
+type Handler = (data: unknown) => void;
 
 function getOrCreateSessionId(): string {
   if (typeof window === 'undefined') return '';
@@ -65,21 +65,21 @@ class WsClient {
     };
   }
 
-  private fire(event: string, data: any) {
+  private fire(event: string, data: unknown) {
     this.handlers.get(event)?.forEach(h => h(data));
   }
 
-  on(event: string, handler: Handler): void {
+  on<T = unknown>(event: string, handler: (data: T) => void): void {
     if (!this.handlers.has(event)) this.handlers.set(event, new Set());
-    this.handlers.get(event)!.add(handler);
+    this.handlers.get(event)!.add(handler as Handler);
   }
 
-  off(event: string, handler?: Handler): void {
+  off<T = unknown>(event: string, handler?: (data: T) => void): void {
     if (!handler) { this.handlers.delete(event); return; }
-    this.handlers.get(event)?.delete(handler);
+    this.handlers.get(event)?.delete(handler as Handler);
   }
 
-  emit(event: string, data?: any): void {
+  emit(event: string, data?: unknown): void {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({ event, data }));
     }
