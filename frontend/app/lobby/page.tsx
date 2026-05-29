@@ -35,7 +35,6 @@ function LobbyContent() {
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [error, setError] = useState('');
   const [isConnecting, setIsConnecting] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState('Conectando...');
 
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteUrl, setInviteUrl] = useState('');
@@ -98,25 +97,22 @@ function LobbyContent() {
     if (socket.connected) {
       setTimeout(() => {
         setIsConnecting(false);
-        setConnectionStatus('Conectado!');
       }, 0);
       socket.emit('join-lobby', { nome: nameToUse, sessionId });
     }
 
     socket.on('connect', () => {
       setIsConnecting(false);
-      setConnectionStatus('Conectado!');
       socket.emit('join-lobby', { nome: nameToUse, sessionId });
     });
 
     socket.on('connect_error', (error) => {
       console.error('Erro de conexão:', error);
-      setConnectionStatus('Erro de conexão. Tentando reconectar...');
       setError('Erro ao conectar ao servidor.');
     });
 
     socket.on('disconnect', () => {
-      setConnectionStatus('Desconectado. Tentando reconectar...');
+      setIsConnecting(true);
     });
 
     const deduplicatePlayers = (playerList: Player[]): Player[] => {
