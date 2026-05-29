@@ -142,9 +142,13 @@ Boa sorte e que desbanquem logo essa Entidade! 🏆🎮
 
 # Telas do jogo
 
+## Telas Atuais/Novas - Jogo Versão Final 100% Funcional
 
 
-## Telas Antigas - Prótipo Inicial de Alta Fidelidade
+
+
+
+## Telas Antigas - Protótipo Inicial de Alta Fidelidade
 
 ### Tela Inicial PC e Smartphone
 
@@ -205,6 +209,88 @@ Boa sorte e que desbanquem logo essa Entidade! 🏆🎮
 <img width="1911" height="894" alt="image" src="https://github.com/user-attachments/assets/3daf4a9c-c98d-4a82-b106-0ed294a44ce1" />
 
 <img width="403" height="801" alt="image" src="https://github.com/user-attachments/assets/5f9c91d9-d40e-41b4-9c5b-f4a7d9f0b393" />
+
+---
+
+## Telas da Versão Final
+
+### Tela Inicial — PC e Smartphone
+
+![Tela Inicial PC](images/telasVersaoFinal/telaInicialPc.png)
+
+![Tela Inicial Smartphone](images/telasVersaoFinal/telaInicialSp.png)
+
+### Lobby — Visão Host (PC e Smartphone)
+
+![Lobby Host PC](images/telasVersaoFinal/telaLobbyPcHost.png)
+
+![Lobby Host Smartphone](images/telasVersaoFinal/telaLobbySpJogador.png)
+
+### Lobby - Convidar Jogadores (Somente Host)
+
+![Lobby Convidar Jogadores](images/telasVersaoFinal/telaConvidarJogadoresSomenteHost.png)
+
+### Lobby — Visão Jogador (PC e Smartphone)
+
+![Lobby Jogador PC](images/telasVersaoFinal/telaLobbyPcJogador.png)
+
+![Lobby Jogador Smartphone](images/telasVersaoFinal/telaLobbySpHost.png)
+
+### Jogo — Visão Host PC
+
+![Jogo Host PC](images/telasVersaoFinal/telaJogoPcHost.png)
+
+### Jogo — Visão Host Smartphone
+
+![Jogo Host Smartphone](images/telasVersaoFinal/telaJogoSpHost.png) ![Jogo Host Smartphone - Resposta Recebida](images/telasVersaoFinal/telaJogoSpHostRespostaRecebida.png) ![Jogo Host Smartphone 2](images/telasVersaoFinal/telaJogoSpHost2.png)
+
+### Jogo — Visão Jogador PC (na vez e fora da vez)
+
+![Jogo Jogador PC na Vez](images/telasVersaoFinal/telaJogoJogadorPcNaVezDele.png)
+
+![Jogo Jogador PC fora da Vez](images/telasVersaoFinal/telaJogoPcJogadorQuandoNaoEAVezDele.png)
+
+### Jogo — Visão Jogador Smartphone (na vez e fora da vez)
+
+![Jogo Jogador Smartphone na Vez](images/telasVersaoFinal/telaJogoSpJogadorQuandoEAVezDele.png) ![Jogo Jogador Smartphone na Vez 2](images/telasVersaoFinal/telaJogoSpJogadorQuandoEAVezDele2.png) ![Jogo Jogador Smartphone fora da Vez](images/telasVersaoFinal/telaJogoSpJogadorQuandoNaoEAVezDele.png)
+
+### Resposta Recebida — PC
+
+![Resposta Recebida PC](images/telasVersaoFinal/telaRespostaRecebidaPc.png)
+
+### Resposta Correta
+
+![Resposta Correta](images/telasVersaoFinal/telaRespostaCorreta.png)
+
+### Resposta Errada
+
+![Resposta Errada](images/telasVersaoFinal/telaRespostaErrada.png)
+
+### Ninguém Acertou — Visão Host PC e Alerta Geral
+
+![Host PC quando ninguém acerta](images/telasVersaoFinal/telaDoHostPcQundoNinguemAcertaAResposta.png)
+
+![Ninguém Acertou](images/telasVersaoFinal/telaNinguemAcertou.png)
+
+### Tela de Vitória — Visão Host (PC e Smartphone)
+
+![Vitória Host PC](images/telasVersaoFinal/telaVitoriaPcHost.png)
+
+![Vitória Host Smartphone](images/telasVersaoFinal/telaVitoriaSpHost.png)
+
+### Tela de Vitória — Visão Jogador (PC e Smartphone)
+
+![Vitória Jogador PC](images/telasVersaoFinal/telaVitoriaPcJogador.png)
+
+![Vitória Jogador Smartphone](images/telasVersaoFinal/telaVitoriaSpJogador.png)
+
+### Painel Administrador — CRUD
+
+![Painel Admin - Cartas](images/telasVersaoFinal/telaPainelAdministradorCrudCartas.png)
+
+![Painel Admin - Disciplinas](images/telasVersaoFinal/telaPainelAdministradorCrudDisciplina.png)
+
+![Painel Admin - Temas](images/telasVersaoFinal/telaPainelAdministradorCrudTemas.png)
 
 
 
