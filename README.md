@@ -140,7 +140,11 @@ Boa sorte e que desbanquem logo essa Entidade! 🏆🎮
 
 ---
 
-## Telas do jogo
+# Telas do jogo
+
+
+
+## Telas Antigas - Prótipo Inicial de Alta Fidelidade
 
 ### Tela Inicial PC e Smartphone
 
