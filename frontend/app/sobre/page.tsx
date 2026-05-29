@@ -11,13 +11,13 @@ const steps = [
     number: '01',
     title: 'O HOST Comanda',
     color: '#7C3AED',
-    text: 'O primeiro a entrar vira o HOST — ele vê a carta completa, todas as dicas e a resposta. Os demais jogadores rolam dados para definir a ordem de turnos.',
+    text: 'O primeiro a entrar vira o HOST. Ele vê a carta completa, todas as dicas e a resposta. Os demais jogadores rolam dados para definir a ordem de turnos.',
   },
   {
     number: '02',
     title: 'Dicas Progressivas',
     color: '#EC4899',
-    text: 'Cada carta começa valendo 10 pontos. O jogador da vez revela dicas uma a uma — a cada nova dica, a pontuação cai 1 ponto. Menos dicas, mais pontos!',
+    text: 'Cada carta começa valendo 10 pontos. O jogador da vez revela dicas uma a uma. A cada nova dica, a pontuação cai 1 ponto. Menos dicas, mais pontos!',
   },
   {
     number: '03',
@@ -46,14 +46,14 @@ const nameCards = [
     color: '#EC4899',
     glow: 'rgba(236,72,153,0.4)',
     label: 'O Framework',
-    desc: 'O frontend roda em Next.js 15 com App Router — React moderno, rápido, renderizado no servidor.',
+    desc: 'O frontend roda em Next.js 16 com App Router. React moderno, rápido, renderizado no servidor.',
   },
   {
     word: 'Fox',
     color: '#F97316',
     glow: 'rgba(249,115,22,0.4)',
     label: 'O Backend',
-    desc: 'O servidor usa Elysia.js no runtime Bun. A raposa é o mascote do ecossistema Elysia — veloz e elegante.',
+    desc: 'O servidor usa Elysia.js no runtime Bun. A raposa é o mascote do ecossistema Elysia, veloz e elegante.',
   },
 ];
 
@@ -176,7 +176,7 @@ export default function SobrePage() {
           <p className="fu3 mt-5 text-base md:text-xl max-w-lg"
             style={{ color: 'rgba(255,255,255,0.52)', lineHeight: 1.6 }}>
             O clássico jogo de adivinhação brasileiro — agora em tempo real,
-            no navegador, com até <strong style={{ color: 'rgba(255,255,255,0.85)' }}>11 jogadores</strong>.
+            no navegador, com até <strong style={{ color: 'rgba(255,255,255,0.85)' }}>8 jogadores</strong>.
           </p>
 
           {/* CTA */}
