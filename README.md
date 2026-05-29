@@ -1,6 +1,6 @@
 # 🎮 Jogo Perfil - Quiz Multiplayer
 
-Jogo web multiplayer local estilo "Perfil" (jogo de adivinhação com dicas progressivas) com arquitetura separada em **Backend** (Bun + Elysia) e **Frontend** (Next.js 16+). Suporta até 11 jogadores simultâneos em tempo real via rede local.
+Jogo web multiplayer local estilo "Perfil" (jogo de adivinhação com dicas progressivas) com arquitetura separada em **Backend** (Bun + Elysia) e **Frontend** (Next.js 16+). Suporta até 9 jogadores simultâneos em tempo real via rede local.
 
 ---
 
@@ -9,12 +9,37 @@ Jogo web multiplayer local estilo "Perfil" (jogo de adivinhação com dicas prog
 O **Jogo Perfil** é um quiz de adivinhação divertido e educacional onde:
 - Uma **ENTIDADE: Carta** A resposta correta precisa ser descoberta através de **10 DICAS** progressivas.
 - Há um **HOST** (mestre do jogo) que vê todas as informações da carta (dicas, resposta, controle do jogo).
-- Os demais **JOGADORES** veem apenas as dicas sendo reveladas e a pontuação em jogo em tempo real.
+- Os demais **JOGADORES** (até 8) veem apenas as dicas sendo reveladas, o contador de tempo e a pontuação em jogo em tempo real.
 
 ### 🆕 Mecânicas e Regras Atualizadas
 - **Pontos Dinâmicos Decrescentes:** A carta começa valendo **10 pontos** de Acerto (mesmo que se revele a dica 0 e a dica 1). A cada dica adicional revelada pelo mestre (da 2ª à 10ª), a pontuação decresce sucessivamente até o piso natural de **1 ponto**.
+- **Temporizador de 40 Segundos:** Cada turno tem **40 segundos** contados em tempo real na tela de todos. Se o tempo esgotar sem que o jogador da vez responda, a vez passa automaticamente para o próximo.
+- **Uma Dica por Turno:** O jogador da vez pode revelar **apenas uma dica** por turno antes de responder ou passar a vez. Após revelar, deve responder ou ceder o turno.
 - **O Vencedor Preserva a Vez:** O jogador que **acerta** a resposta além de faturar a atual contagem de pontos ganha o direito de manter sua "Vez" para a solicitação da carta e de dicas da rodada seguinte! O turno só é passado se o jogador errar uma alternativa ou se resolver pular a vez.
 - **Ninguém Acertou ("Alerta Amarelo"):** Se todas as dicas foram expostas ou a paciência da mesa cedeu e ninguém adivinhou a Entidade, o HOST pode resolver a carta. Um modal de alerta amarelo cobrirá todas as telas revelando a reposta não preenchida.
+
+### 💡 Recomendações do Desenvolvedor
+
+> **Crie um Hotspot Wi-Fi direto no PC do HOST.**
+>
+> Após vários testes, a forma mais estável que encontramos para jogar foi o próprio PC que roda o jogo criar um ponto de acesso (hotspot) e os demais jogadores se conectarem a ele. Evita bugs de conexão, quedas do HOST e instabilidades causadas por roteadores com isolamento de clientes. No Windows: *Configurações → Rede e Internet → Hotspot Móvel*. No Linux: use o NetworkManager ou `nmcli`.
+
+### 🔊 Efeitos Sonoros
+
+O jogo possui efeitos sonoros para os principais momentos da partida. Os arquivos ficam em `frontend/public/sound/`:
+
+| Arquivo | Momento em que toca |
+|---|---|
+| `answearRight.mp3` | Resposta correta validada pelo HOST |
+| `answearWrong.mp3` | Resposta errada validada pelo HOST |
+| `noOneCorrect.mp3` | HOST revela a resposta (ninguém acertou) |
+| `revealClue.mp3` | Dica revelada pelo jogador da vez |
+| `passTurn.mp3` | Vez passada para o próximo jogador |
+| `sendButton.mp3` | Jogador envia uma resposta |
+| `rolldice.mp3` | Jogador rola os dados no lobby |
+| `victoryScreenSound.mp3` | Tela de vitória ao fim da partida |
+
+Para substituir um som, basta trocar o `.mp3` correspondente mantendo o mesmo nome de arquivo.
 
 ---
 
@@ -33,14 +58,13 @@ O **Jogo Perfil** é um quiz de adivinhação divertido e educacional onde:
 
 ### Opção A — Um único comando (recomendado)
 
-Na raiz do projeto, instale as dependências de cada serviço uma vez e depois use o script unificado:
-
 ```bash
-cd backend && bun install && cd ../frontend && bun install && cd ..
 bun startgame.ts
 ```
 
-O script `startgame.ts` sobe o **Backend** (porta 3001) e o **Frontend** (porta 3000) em paralelo num único terminal, com logs prefixados por `[backend]` e `[frontend]`. `Ctrl+C` encerra os dois.
+Só isso. Na **primeira execução**, o script detecta automaticamente que `node_modules` ainda não existe e instala as dependências do backend e do frontend antes de subir os serviços. Nas execuções seguintes, pula direto para iniciar.
+
+O script sobe o **Backend** (porta 3001) e o **Frontend** (porta 3000) em paralelo num único terminal, com logs prefixados por `[backend]` e `[frontend]`. `Ctrl+C` encerra os dois.
 
 ### Opção B — Dois terminais separados
 
@@ -64,17 +88,15 @@ Após estar rodando, acesse o app em: **http://localhost:3000**
 
 ## 🌐 Jogando com Amigos (Em Rede Local / Wi-Fi)
 
-A beleza do jogo é compartilhar as telas dos jogadores num ambiente interno ou laboratório. Você pode rodar tudo no seu PC (Mestre) e as pessoas no celular via Browser.
+Você pode rodar tudo no seu PC (Mestre) e os convidados entram pelo celular ou outro computador na mesma rede.
 
-1. **Atenção Padrão:** Certifique-se de que nenhum roteador isola aparelhos nem possua bloqueio de rede para os convidados. Todos na mesma Wi-Fi!
-2. **Convide com QR Code:** Assim que estiver no Lobby como HOST, clique no botão **"Convidar Jogadores"**. O sistema detecta automaticamente o IP da sua máquina na rede e gera um QR Code — basta os convidados escanearem com a câmera do celular para entrar diretamente na sala. Há também um botão **Copiar** para compartilhar o link pelo chat.
-3. **Ou descubra o IP manualmente:**
-   - **Windows**: `ipconfig` → "Endereço IPv4"
-   - **Mac/Linux**: `ip addr` ou `ifconfig`
+1. **Todos na mesma rede:** Certifique-se de que todos os dispositivos estejam no mesmo Wi-Fi ou rede local. Alguns roteadores possuem isolamento de clientes — desative-o se necessário.
+2. **Convide pelo Lobby:** Assim que entrar no Lobby como HOST, clique em **"Convidar Jogadores"**. Um modal abre com:
+   - **QR Code** — basta escanear com a câmera do celular para acessar a sala diretamente.
+   - **Endereço da sala** — exibido em texto (ex: `http://192.168.1.100:3000`) com um botão **Copiar** para enviar pelo chat.
+   - O IP é detectado automaticamente pelo servidor; nenhuma configuração manual é necessária.
 
-   Com o IP em mãos (ex: `192.168.1.100`), os jogadores acessam **`http://192.168.1.100:3000`**.
-
-*(Nunca distribua o endereço `"localhost"`, pois essa rede é estritamente pessoal ao seu computador)*
+> Se o QR code ou o endereço exibido não funcionar, verifique se o Firewall da máquina hospedeira está bloqueando as portas **3000** e **3001** e crie exceções de entrada para elas.
 
 ---
 
@@ -86,7 +108,7 @@ A beleza do jogo é compartilhar as telas dos jogadores num ambiente interno ou 
 - Ao final dos membros, o HOST clica na autorização para formar a ordem e arrasta todo o grupo ao salão de Início.
 
 ### 2. A Partida em Si
-- Os **JOGADORES** observam quantas dezenas de casas podem evoluir no lance (sinalizado visualmente pela box Pontos em Jogo). Quando o "Sua Vez" brilhar, podem requisitar liberação de dicas.
+- Os **JOGADORES** observam quantas casas podem evoluir no lance (sinalizado visualmente pela box Pontos em Jogo) e o **contador regressivo de 40 segundos**. Quando o "Sua Vez" brilhar, podem requisitar **uma** dica antes de responder ou passar.
 - Qualquer indivíduo tem capacidade de arriscar um pitaco **A qualquer exato momento** no campo Resposta!
 - O **HOST** escuta a notificação sonora da tentativa enviada e usa os botões para validar e sinalizar visualmente: Acerto (Verde), Errou (Vermelho) ou Falha da Tenda (Amarelo).
 
@@ -113,7 +135,7 @@ Você pode conferir detalhes simplificados das normativas no arquivo formal `LIC
 
 ## 👨‍💻 Feito para Divertir
 
-*(Desenvolvido em Next.js | Dezembro 2025/Abril 2026 - Versão V2 MonoSeparada).*
+*(Desenvolvido em Next.js | Dezembro 2025/Abril 2026).*
 Boa sorte e que desbanquem logo essa Entidade! 🏆🎮
 
 ---
