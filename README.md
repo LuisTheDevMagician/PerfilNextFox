@@ -1,15 +1,22 @@
 # 🎮 Jogo Perfil - Quiz Multiplayer
 
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20NC%201.0-blue)](https://polyformproject.org/licenses/noncommercial/1.0.0)
+
 Jogo web multiplayer local estilo "Perfil" (jogo de adivinhação com dicas progressivas) com arquitetura separada em **Backend** (Bun + Elysia) e **Frontend** (Next.js 16+). Suporta até 9 jogadores simultâneos em tempo real via rede local.
 
 ---
 
 ## 📋 Sobre o Jogo
 
-O **Jogo Perfil** é um quiz de adivinhação divertido e educacional onde:
+O **Jogo PerfilNextFox** é um quiz de adivinhação divertido e educacional onde:
 - Uma **ENTIDADE: Carta** A resposta correta precisa ser descoberta através de **10 DICAS** progressivas.
 - Há um **HOST** (mestre do jogo) que vê todas as informações da carta (dicas, resposta, controle do jogo).
 - Os demais **JOGADORES** (até 8) veem apenas as dicas sendo reveladas, o contador de tempo e a pontuação em jogo em tempo real.
+
+**Logo do Game**:
+
+
+![Logo do Game](images/logo.png)
 
 ### 🆕 Mecânicas e Regras Atualizadas
 - **Pontos Dinâmicos Decrescentes:** A carta começa valendo **10 pontos** de Acerto (mesmo que se revele a dica 0 e a dica 1). A cada dica adicional revelada pelo mestre (da 2ª à 10ª), a pontuação decresce sucessivamente até o piso natural de **1 ponto**.
@@ -126,11 +133,13 @@ Você pode rodar tudo no seu PC (Mestre) e os convidados entram pelo celular ou 
 
 ---
 
-## 📄 Licença e Tipificação
+## 📄 Licença
 
-Este projeto é ofertado segundo a rigorosa padronização internacional Creative Commons **Attribution-NonCommercial 4.0 International Public License (CC BY-NC 4.0)**. O material, fonte, arquitetura e propósitos garantem utilização didática, livre estudo, seminários e testes. O uso voltado a meios de arrecadação financeira é defeso e vetado.
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20NC%201.0-blue)](https://polyformproject.org/licenses/noncommercial/1.0.0)
 
-Você pode conferir detalhes simplificados das normativas no arquivo formal `LICENSE` repousado na respectiva folha base do projeto.
+Este projeto está licenciado sob a **PolyForm Noncommercial License 1.0.0**. É permitido usar, copiar, modificar e distribuir o software para fins não comerciais (estudos, pesquisa, projetos pessoais, uso educacional). O uso com fins comerciais é proibido.
+
+Consulte o arquivo [`LICENSE`](LICENSE) para o texto completo.
 
 ---
 
