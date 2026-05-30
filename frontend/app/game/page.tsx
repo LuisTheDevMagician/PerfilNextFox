@@ -65,6 +65,7 @@ export default function GamePage() {
   const [totalCards, setTotalCards] = useState(0);
   const [turnStartedAt, setTurnStartedAt] = useState<number>(0);
   const [timeLeft, setTimeLeft] = useState<number>(40);
+  const [hasRevealedThisTurn, setHasRevealedThisTurn] = useState(false);
   const isRevealingRef = useRef(false);
   const revealedCluesCountRef = useRef(0);
 
@@ -170,6 +171,7 @@ export default function GamePage() {
         setTimeLeft(40);
       }
       setHasAnswered(false);
+      setHasRevealedThisTurn(false);
       isRevealingRef.current = false;
     };
 
@@ -259,6 +261,11 @@ export default function GamePage() {
     }
   }, [timeLeft, currentPlayerId, myId, hasAnswered, turnStartedAt]);
 
+  // Reseta ao mudar de turno para que as dicas voltem a aparecer como "reveláveis"
+  useEffect(() => {
+    setHasRevealedThisTurn(false);
+  }, [currentPlayerId]);
+
   const handleRevealClue = () => {
     socketRef.current?.emit('pass-turn');
     isRevealingRef.current = false;
@@ -270,6 +277,7 @@ export default function GamePage() {
     if (currentPlayerIndex !== myIndex) return;
     if (revealedClueIndices.includes(clueIndex)) return;
     isRevealingRef.current = true;
+    setHasRevealedThisTurn(true);
     socketRef.current?.emit('reveal-clue', clueIndex);
   };
 
@@ -585,7 +593,7 @@ export default function GamePage() {
               {currentCard.dicas.map((dica, index) => {
                 const isRevealed = revealedClueIndices.includes(index);
                 const hasPendingAnswers = answers.length > 0;
-                const canReveal = isMyTurn && !isRevealed && revealedClueIndices.length < 10 && !hasPendingAnswers;
+                const canReveal = isMyTurn && !isRevealed && revealedClueIndices.length < 10 && !hasPendingAnswers && !hasRevealedThisTurn;
 
                 return (
                   <div key={index}

@@ -124,7 +124,10 @@ export function OverlayNinguemAcertou({ show, correctAnswer, onDismiss }: {
     if (!show) return;
     soundManager.play('noOneCorrect');
     const t = setTimeout(onDismiss, 3000);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+      soundManager.stop('noOneCorrect');
+    };
   }, [show, onDismiss]);
 
   if (!show) return null;
