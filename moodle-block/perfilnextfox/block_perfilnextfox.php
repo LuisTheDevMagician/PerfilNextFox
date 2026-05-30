@@ -60,12 +60,28 @@ class block_perfilnextfox extends block_base {
 #pfx-launch:hover { filter: brightness(1.1); }
 </style>
 
-<button id="pfx-launch" onclick="document.getElementById(\'pfx-overlay\').style.display=\'block\'">
+<script>
+function pfxLaunch() {
+    var overlay = document.getElementById("pfx-overlay");
+    document.body.appendChild(overlay);
+    document.querySelectorAll(".navbar, .fixed-top, #page-header, #page-navbar")
+        .forEach(function(el) { el.style.setProperty("z-index", "0", "important"); });
+    overlay.style.display = "block";
+}
+function pfxClose() {
+    var overlay = document.getElementById("pfx-overlay");
+    overlay.style.display = "none";
+    document.querySelectorAll(".navbar, .fixed-top, #page-header, #page-navbar")
+        .forEach(function(el) { el.style.removeProperty("z-index"); });
+}
+</script>
+
+<button id="pfx-launch" onclick="pfxLaunch()">
     &#9654; Iniciar PerfilNextFox
 </button>
 
 <div id="pfx-overlay">
-    <button id="pfx-close" onclick="document.getElementById(\'pfx-overlay\').style.display=\'none\'">
+    <button id="pfx-close" onclick="pfxClose()">
         &#x2715; Fechar
     </button>
     <iframe src="' . $gameurl . '" allow="autoplay"></iframe>
