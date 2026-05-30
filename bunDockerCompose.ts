@@ -20,7 +20,7 @@ console.log('');
 
 const extraArgs = process.argv.slice(2);
 const proc = spawn(['docker', 'compose', 'up', '-d', ...extraArgs], {
-  env: { ...process.env, MOODLE_WWWROOT: wwwroot },
+  env: { ...process.env, MOODLE_WWWROOT: wwwroot, LAN_IP: ip },
   stdout: 'inherit',
   stderr: 'inherit',
   cwd: import.meta.dir,

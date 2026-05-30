@@ -8,6 +8,7 @@ import { seedInitialData } from './db/seed';
 import './db';
 
 function getLanIp(): string {
+  if (process.env.LAN_IP) return process.env.LAN_IP;
   for (const nets of Object.values(networkInterfaces())) {
     for (const net of nets ?? []) {
       if (net.family === 'IPv4' && !net.internal) return net.address;
