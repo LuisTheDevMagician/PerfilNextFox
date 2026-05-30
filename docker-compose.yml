@@ -35,7 +35,7 @@ services:
       MOODLE_DB_PASS: moodle
       MOODLE_ADMIN_USER: admin
       MOODLE_ADMIN_PASS: admin123
-      MOODLE_WWWROOT: http://localhost:8080
+      MOODLE_WWWROOT: ${MOODLE_WWWROOT:-http://localhost:8080}
       MOODLE_FULLNAME: PerfilNextFox AVA
       MOODLE_SHORTNAME: PNF
     volumes:

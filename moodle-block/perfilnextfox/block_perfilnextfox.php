@@ -12,7 +12,9 @@ class block_perfilnextfox extends block_base {
             return $this->content;
         }
 
-        $gameurl = 'http://localhost:3000';
+        global $CFG;
+        $parsed  = parse_url($CFG->wwwroot);
+        $gameurl = 'http://' . $parsed['host'] . ':3000';
 
         $this->content = new stdClass();
         $this->content->text = '
