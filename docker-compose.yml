@@ -1,0 +1,75 @@
+services:
+
+  mariadb:
+    image: mariadb:10.11
+    container_name: perfil_mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpassword
+      MARIADB_DATABASE: moodle
+      MARIADB_USER: moodle
+      MARIADB_PASSWORD: moodle
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - perfil_net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  moodle:
+    image: bitnami/moodle:4
+    container_name: perfil_moodle
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      MOODLE_DATABASE_HOST: mariadb
+      MOODLE_DATABASE_PORT_NUMBER: 3306
+      MOODLE_DATABASE_NAME: moodle
+      MOODLE_DATABASE_USER: moodle
+      MOODLE_DATABASE_PASSWORD: moodle
+      MOODLE_USERNAME: admin
+      MOODLE_PASSWORD: admin123
+      MOODLE_SITE_NAME: PerfilNextFox AVA
+    volumes:
+      - moodle_data:/bitnami/moodle
+      - ./moodle-block/block_perfilnextfox:/bitnami/moodle/blocks/block_perfilnextfox:ro
+    networks:
+      - perfil_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: perfil_backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - quiz_db_data:/app/data
+    networks:
+      - perfil_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: perfil_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - perfil_net
+
+networks:
+  perfil_net:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+  moodle_data:
+  quiz_db_data:
