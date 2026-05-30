@@ -48,7 +48,7 @@ A root `tsconfig.json` exists solely to give the TypeScript language server type
 - Native WebSocket at `/ws` (delegated to `src/ws.ts` via `wsHandlers`)
 - `GET /health`, `GET /game-state`, and `GET /network-ip` status endpoints
 
-`GET /network-ip` returns `{ ip: string }` — the machine's first non-internal IPv4 address via `os.networkInterfaces()`, falling back to `"localhost"`. Used by the lobby's invite QR code to produce a LAN-accessible URL.
+`GET /network-ip` returns `{ ip: string }` — reads `process.env.LAN_IP` first (injected by `bunDockerCompose.ts`); falls back to the first non-internal IPv4 from `os.networkInterfaces()`, then `"localhost"`. Used by the lobby's invite QR code to produce a LAN-accessible URL.
 
 **Game state:** `src/game.ts` — `GerenciadorJogo` singleton (`gerenciadorJogo`) holds all runtime state in memory (player maps, current card, turn tracking) and syncs to SQLite via `src/db/queries.ts`. State persists across server restarts through `carregarSessaoAtiva()` on construction.
 
@@ -90,7 +90,7 @@ Active session tables (in both `schema.ts` and `initDatabase()`): `sessoes_jogo`
 
 **Pages** (all in `frontend/app/`):
 - `/` (`page.tsx`) — name entry screen, stores name in `localStorage`
-- `/lobby` (`lobby/page.tsx`) — waiting room; HOST sees theme selector (disciplina → tema), control buttons, invite QR-code modal, and **Abrir Tela Espectador** button (HOST only); the invite modal fetches the LAN IP from `GET /network-ip` so the QR code encodes `http://<lan-ip>:3000` instead of `localhost`; players see dice roll
+- `/lobby` (`lobby/page.tsx`) — waiting room; HOST sees theme selector (disciplina → tema), control buttons, invite QR-code modal, and **Abrir Tela Espectador** button (HOST only); the invite modal fetches the LAN IP from `GET /network-ip` and builds the QR URL as `http://<lan-ip>:<NEXT_PUBLIC_INVITE_PORT>` (defaults to `3000`; set to `8080` in Docker so the QR points to Moodle); players see dice roll
 - `/game` (`game/page.tsx`) — main game screen; HOST view shows full card + clues + answer validation panel; player view shows revealed clues + answer input + card progress counter. Overlays (correct/wrong/nobody) imported from `app/components/RespostasOverlay.tsx`
 - `/espectador` (`espectador/page.tsx`) — read-only spectator screen opened in a new tab from the lobby (HOST only). Three states: **waiting** (floating card animation + spinner + player list with dice rolls), **in-game** (two-panel layout: card+clues left 65%, host badge+timer+scoreboard right 35%), **end-game** (trophy + ranking, no action buttons). Connects via `lib/spectatorSocket.ts`, never emits action events
 - `/victory` (`victory/page.tsx`) — final ranking; HOST can restart or exit to lobby
@@ -122,3 +122,36 @@ Active session tables (in both `schema.ts` and `initDatabase()`): `sessoes_jogo`
 - Disconnects are soft (socket ID cleared to `''`, player kept in DB); `sair-lobby` is a hard remove.
 - The HOST does not accumulate score and their score is not displayed in either game view.
 - `bun run --watch` sends SIGTERM (not SIGINT) on file changes, so `gerenciadorJogo.limparTudo()` (wired to SIGINT only) is never called on hot reload — stale session data can persist in SQLite across restarts during development.
+
+## Docker / AVA Mode (Moodle)
+
+This repo has a second deployment mode that wraps the game in a Moodle LMS instance for classroom use.
+
+**Entry point:**
+```bash
+bun bunDockerCompose.ts           # detect LAN IP, start all 4 containers
+bun bunDockerCompose.ts --build   # same + rebuild images
+docker compose down -v            # full reset (drops DB and Moodle data volumes)
+```
+
+**Services (docker-compose.yml):**
+| Container | Port | Purpose |
+|---|---|---|
+| `perfil_moodle` | 8080 | Moodle LMS (Apache + PHP, image in `moodle/`) |
+| `perfil_frontend` | 3000 | Next.js (same image as dev) |
+| `perfil_backend` | 3001 | Bun/Elysia (same image as dev) |
+| `perfil_mariadb` | 3306 | MariaDB for Moodle (not used by the game) |
+
+**LAN IP injection:** `bunDockerCompose.ts` detects the host's first non-internal IPv4 and passes it as two env vars: `MOODLE_WWWROOT=http://<ip>:8080` and `LAN_IP=<ip>`. The backend reads `LAN_IP` in `getLanIp()`. If you change networks (e.g. Wi-Fi → cable → hotspot), re-run `bunDockerCompose.ts` to update both.
+
+**`MOODLE_WWWROOT` is hard-set in `config.php`** — the Moodle CLI refuses to override it (`error code 4`). `bunDockerCompose.ts` patches it directly with `sed` after the containers start, then calls `purge_caches.php`. Never use `admin/cli/cfg.php --name=wwwroot` for this.
+
+**`moodle/entrypoint.sh`** handles two cases on startup:
+- DB empty → runs `admin/cli/install.php` (first run, slow)
+- DB exists but `config.php` missing (container recreated without `-v`) → regenerates `config.php` from env vars without reinstalling
+
+**Moodle block (`moodle-block/perfilnextfox/`):** Bind-mounted read-only into the container at `/var/www/html/blocks/perfilnextfox`. No rebuild needed when editing PHP files — changes take effect on page reload. `block_perfilnextfox.php` builds the iframe `src` from `$CFG->wwwroot` host + `:3000` (always port 3000 — the game frontend, not Moodle).
+
+**`NEXT_PUBLIC_INVITE_PORT` is a build-time ARG**, not a runtime env var. It is baked into the Next.js bundle during `docker build` via `frontend/Dockerfile`. Currently hardcoded to `"8080"` in `docker-compose.yml` `build.args` so the QR code in the lobby points to Moodle. To change it you must rebuild the frontend image (`--build`).
+
+**Guest access for students:** In each Moodle course, go to Participants → Métodos de inscrição → enable **Acesso como visitante**. Students open the course URL, click "Entrar como visitante", and launch the game from the block — no account needed.
