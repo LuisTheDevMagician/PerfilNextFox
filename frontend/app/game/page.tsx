@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { getSocket, getSessionId, type WsClient } from '@/lib/socket';
 import { soundManager } from '@/lib/soundManager';
 import { Card } from '@/lib/cards';
+import { CountdownRing, OverlayAcerto, OverlayErro, OverlayNinguemAcertou } from '@/app/components/RespostasOverlay';
 import StarIcon from '@mui/icons-material/Star';
-import LockIcon from '@mui/icons-material/Lock';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import CheckIcon from '@mui/icons-material/Check';
@@ -17,7 +17,6 @@ import TimerIcon from '@mui/icons-material/Timer';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
-import WarningIcon from '@mui/icons-material/Warning';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import GroupIcon from '@mui/icons-material/Group';
@@ -38,56 +37,6 @@ interface Answer {
   timestamp: number;
 }
 
-function Modal({ children, borderColor }: { children: React.ReactNode, borderColor: string }) {
-  return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 px-4"
-      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}>
-      <div className="glass rounded-2xl p-8 max-w-sm w-full text-center animate-bounce"
-        style={{ borderColor, borderWidth: 1 }}>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function CountdownRing({ timeLeft, visible, large = false }: { timeLeft: number; visible: boolean; large?: boolean }) {
-  if (!visible) return null;
-  const r = large ? 28 : 18;
-  const strokeWidth = large ? 5 : 4;
-  const size = large ? 68 : 46;
-  const cx = size / 2;
-  const circumference = 2 * Math.PI * r;
-  const dashoffset = circumference * (1 - Math.min(timeLeft, 40) / 40);
-  const isUrgent = timeLeft <= 10;
-  const color = isUrgent ? '#EF4444' : '#C4B5FD';
-
-  return (
-    <div className={isUrgent ? 'animate-pulse' : ''} style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
-      <svg width={size} height={size}>
-        <circle cx={cx} cy={cx} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={strokeWidth} />
-        <circle
-          cx={cx} cy={cx} r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={dashoffset}
-          strokeLinecap="round"
-          transform={`rotate(-90 ${cx} ${cx})`}
-          style={{ transition: 'stroke-dashoffset 0.1s linear, stroke 0.5s ease' }}
-        />
-      </svg>
-      <span
-        style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: large ? '1rem' : '0.7rem', fontWeight: 'bold', color,
-        }}>
-        {Math.ceil(timeLeft)}
-      </span>
-    </div>
-  );
-}
 
 export default function GamePage() {
   const router = useRouter();
@@ -182,7 +131,6 @@ export default function GamePage() {
     };
 
     const handleAnswerCorrect = ({ playerName, correctAnswer, currentPlayerId: playerId, players: updatedPlayers }: { playerName: string, correctAnswer: string, currentPlayerId: string, players: Player[] }) => {
-      soundManager.play('answearRight');
       setWinnerName(playerName);
       setCorrectAnswerText(correctAnswer);
       setShowCorrectAnswer(true);
@@ -192,11 +140,9 @@ export default function GamePage() {
       setTurnStartedAt(0);
       setTimeLeft(40);
       setHasAnswered(false);
-      setTimeout(() => { setShowCorrectAnswer(false); setPlayerAnswer(''); }, 3000);
     };
 
-    const handleAnswerIncorrect = ({ playerName, answer, nextPlayerIndex, nextPlayerId, players: updatedPlayers, turnStartedAt: newTurnStartedAt }: { playerName: string, answer: string, nextPlayerIndex: number, nextPlayerId: string, players?: Player[], turnStartedAt?: number }) => {
-      soundManager.play('answearWrong');
+    const handleAnswerIncorrect = ({ playerName, answer, nextPlayerIndex, nextPlayerId, players: updatedPlayers }: { playerName: string, answer: string, nextPlayerIndex: number, nextPlayerId: string, players?: Player[], turnStartedAt?: number }) => {
       setCurrentPlayerIndex(nextPlayerIndex);
       setCurrentPlayerId(nextPlayerId);
       if (updatedPlayers) setPlayers(updatedPlayers.filter((p, i, arr) => arr.findIndex(x => x.name === p.name) === i));
@@ -204,15 +150,6 @@ export default function GamePage() {
       setErrorAnswer(answer || '');
       setShowErrorAnswer(true);
       setHasAnswered(false);
-      setTimeout(() => {
-        setShowErrorAnswer(false);
-        setErrorPlayerName('');
-        setErrorAnswer('');
-        if (newTurnStartedAt !== undefined) {
-          setTurnStartedAt(Date.now());
-          setTimeLeft(40);
-        }
-      }, 3200);
     };
 
     const handleNextCard = ({ currentCard: card, currentPlayerIndex: index, currentPlayerId: playerId, players: updatedPlayers, currentCardIndex: cardIdx, totalCards: total, turnStartedAt: newTurnStartedAt }: { currentCard: Card, currentPlayerIndex: number, currentPlayerId: string, players?: Player[], currentCardIndex?: number, totalCards?: number, turnStartedAt?: number }) => {
@@ -247,12 +184,10 @@ export default function GamePage() {
     const handleAnswersUpdated = (updatedAnswers: Answer[]) => { setAnswers(updatedAnswers); };
 
     const handleAnswerRevealed = ({ correctAnswer }: { correctAnswer: string }) => {
-      soundManager.play('noOneCorrect');
       setCorrectAnswerText(correctAnswer);
       setShowNobodyGuessed(true);
       setTurnStartedAt(0);
       setTimeLeft(40);
-      setTimeout(() => setShowNobodyGuessed(false), 3000);
     };
 
     const handleAnswerSubmitted = () => {
@@ -523,34 +458,29 @@ export default function GamePage() {
           </div>
         </div>
 
-        {showCorrectAnswer && (
-          <Modal borderColor="rgba(34,197,94,0.4)">
-            <CheckCircleIcon style={{ color: '#86EFAC', fontSize: 48 }} />
-            <h2 className="text-2xl font-bold mt-3 mb-2" style={{ color: '#86EFAC' }}>CORRETO!</h2>
-            <p style={{ color: 'rgba(255,255,255,0.7)' }}><strong style={{ color: '#fff' }}>{winnerName}</strong> acertou!</p>
-            <p className="font-bold text-lg mt-2" style={{ color: '#C4B5FD' }}>{correctAnswerText}</p>
-          </Modal>
-        )}
-
-        {showErrorAnswer && (
-          <Modal borderColor="rgba(239,68,68,0.4)">
-            <CancelIcon style={{ color: '#FCA5A5', fontSize: 48 }} />
-            <h2 className="text-2xl font-bold mt-3 mb-2" style={{ color: '#FCA5A5' }}>ERRADO!</h2>
-            <p style={{ color: 'rgba(255,255,255,0.7)' }}><strong style={{ color: '#fff' }}>{errorPlayerName}</strong> errou</p>
-            <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              Resposta do jogador: <span className="font-bold" style={{ color: '#FCA5A5' }}>{errorAnswer}</span>
-            </p>
-          </Modal>
-        )}
-
-        {showNobodyGuessed && (
-          <Modal borderColor="rgba(234,179,8,0.4)">
-            <WarningIcon style={{ color: '#FDE68A', fontSize: 48 }} />
-            <h2 className="text-2xl font-bold mt-3 mb-2" style={{ color: '#FDE68A' }}>NINGUÉM ACERTOU!</h2>
-            <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>A resposta era:</p>
-            <p className="font-bold text-lg" style={{ color: '#FDE68A' }}>&quot;{correctAnswerText}&quot;</p>
-          </Modal>
-        )}
+        <OverlayAcerto
+          show={showCorrectAnswer}
+          winnerName={winnerName}
+          correctAnswer={correctAnswerText}
+          onDismiss={() => { setShowCorrectAnswer(false); setPlayerAnswer(''); }}
+        />
+        <OverlayErro
+          show={showErrorAnswer}
+          playerName={errorPlayerName}
+          answer={errorAnswer}
+          onDismiss={() => {
+            setShowErrorAnswer(false);
+            setErrorPlayerName('');
+            setErrorAnswer('');
+            setTurnStartedAt(Date.now());
+            setTimeLeft(40);
+          }}
+        />
+        <OverlayNinguemAcertou
+          show={showNobodyGuessed}
+          correctAnswer={correctAnswerText}
+          onDismiss={() => setShowNobodyGuessed(false)}
+        />
       </div>
     );
   }
@@ -742,35 +672,29 @@ export default function GamePage() {
         </div>
       </div>
 
-      {showCorrectAnswer && (
-        <Modal borderColor="rgba(34,197,94,0.4)">
-          <CheckCircleIcon style={{ color: '#86EFAC', fontSize: 48 }} />
-          <h2 className="text-2xl font-bold mt-3 mb-2" style={{ color: '#86EFAC' }}>CORRETO!</h2>
-          <p style={{ color: 'rgba(255,255,255,0.7)' }}><strong style={{ color: '#fff' }}>{winnerName}</strong> acertou!</p>
-          <p className="font-bold text-lg mt-2" style={{ color: '#C4B5FD' }}>{correctAnswerText}</p>
-        </Modal>
-      )}
-
-      {showErrorAnswer && (
-        <Modal borderColor="rgba(239,68,68,0.4)">
-          <CancelIcon style={{ color: '#FCA5A5', fontSize: 48 }} />
-          <h2 className="text-2xl font-bold mt-3 mb-2" style={{ color: '#FCA5A5' }}>ERRADO!</h2>
-          <p style={{ color: 'rgba(255,255,255,0.7)' }}><strong style={{ color: '#fff' }}>{errorPlayerName}</strong> errou</p>
-          <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
-            Resposta do jogador: <span className="font-bold" style={{ color: '#FCA5A5' }}>{errorAnswer}</span>
-          </p>
-          <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>Vez do próximo jogador</p>
-        </Modal>
-      )}
-
-      {showNobodyGuessed && (
-        <Modal borderColor="rgba(234,179,8,0.4)">
-          <WarningIcon style={{ color: '#FDE68A', fontSize: 48 }} />
-          <h2 className="text-2xl font-bold mt-3 mb-2" style={{ color: '#FDE68A' }}>NINGUÉM ACERTOU!</h2>
-          <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>A resposta era:</p>
-          <p className="font-bold text-lg" style={{ color: '#FDE68A' }}>&quot;{correctAnswerText}&quot;</p>
-        </Modal>
-      )}
+      <OverlayAcerto
+        show={showCorrectAnswer}
+        winnerName={winnerName}
+        correctAnswer={correctAnswerText}
+        onDismiss={() => { setShowCorrectAnswer(false); setPlayerAnswer(''); }}
+      />
+      <OverlayErro
+        show={showErrorAnswer}
+        playerName={errorPlayerName}
+        answer={errorAnswer}
+        onDismiss={() => {
+          setShowErrorAnswer(false);
+          setErrorPlayerName('');
+          setErrorAnswer('');
+          setTurnStartedAt(Date.now());
+          setTimeLeft(40);
+        }}
+      />
+      <OverlayNinguemAcertou
+        show={showNobodyGuessed}
+        correctAnswer={correctAnswerText}
+        onDismiss={() => setShowNobodyGuessed(false)}
+      />
     </div>
   );
 }
