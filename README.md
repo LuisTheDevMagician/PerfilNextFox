@@ -151,7 +151,7 @@ Desenvolvido por:
 
  **[GuilhermeAlves25 - Guilherme Alves Da Silva](https://github.com/GuilhermeAlves25)** -  Aluno - Análise e Desenvolvimento de Sistemas - Módulo V - IFPI - Campus Corrente
 
- Phaola - Aluna - Análise e Desenvolvimento de Sistemas - Módulo V - IFPI - Campus Corrente
+ **[phaolapaixao - Phaola Paraguai da Paixão Lustosa](https://github.com/phaolapaixao)**- Aluna - Análise e Desenvolvimento de Sistemas - Módulo V - IFPI - Campus Corrente
 
 
  Karl - Professor - Análise e Desenvolvimento de Sistemas - Módulo V - IFPI - Campus Corrente
