@@ -1,5 +1,7 @@
 FROM moodlehq/moodle-php-apache:8.2
 
+ENV APACHE_DOCUMENT_ROOT=/var/www/html
+
 # Baixa Moodle 4.5.2 do GitHub oficial
 RUN curl -fsSL https://github.com/moodle/moodle/archive/refs/tags/v4.5.2.tar.gz \
     | tar xz --strip-components=1 -C /var/www/html \

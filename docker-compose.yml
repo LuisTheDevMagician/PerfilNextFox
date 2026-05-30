@@ -40,7 +40,7 @@ services:
       MOODLE_SHORTNAME: PNF
     volumes:
       - moodle_data:/var/moodledata
-      - ./moodle-block/block_perfilnextfox:/var/www/html/blocks/block_perfilnextfox:ro
+      - ./moodle-block/perfilnextfox:/var/www/html/blocks/perfilnextfox:ro
     networks:
       - perfil_net
 
