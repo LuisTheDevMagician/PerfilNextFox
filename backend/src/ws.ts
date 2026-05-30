@@ -445,6 +445,27 @@ export const wsHandlers = {
       case 'restart-game':         handleRestartGame(socketId); break;
       case 'exit-victory-screen':  handleExitVictoryScreen(socketId); break;
       case 'sair-lobby':           handleSairLobby(socketId); break;
+      case 'spectator-join': {
+        const sessao = gerenciadorJogo.buscarSessaoAtiva();
+        if (!sessao || !gerenciadorJogo.getJogoIniciado()) {
+          sendTo(socketId, 'spectator-state', {
+            gameStarted: false,
+            players: gerenciadorJogo.getJogadores(getActiveSocketIds()).map(mapJogadorParaFrontend),
+          });
+          break;
+        }
+        sendTo(socketId, 'spectator-state', {
+          gameStarted: true,
+          players: gerenciadorJogo.getJogadores(getActiveSocketIds()).map(mapJogadorParaFrontend),
+          currentCard: gerenciadorJogo.getCartaAtual(),
+          revealedClueIndices: gerenciadorJogo.getDicasReveladas(),
+          currentPlayerIndex: getIndiceJogadorTurno(),
+          currentPlayerId: getIdJogadorTurno(),
+          ...getCardCounter(),
+          turnStartedAt: gerenciadorJogo.getTurnStartedAt(),
+        });
+        break;
+      }
     }
   },
 

@@ -248,7 +248,9 @@ Boa sorte e que desbanquem logo essa Entidade! 🏆🎮
 
 ![Lobby Host PC](images/telasVersaoFinal/telaLobbyPcHost.png)
 
-![Lobby Host Smartphone](images/telasVersaoFinal/telaLobbySpJogador.png)
+![Lobby Pc Host 2](images/telasVersaoFinal/telaLobbyPcHost2.png)
+
+![Lobby Host Smartphone](images/telasVersaoFinal/telaLobbySpHost.png)
 
 ### Lobby - Convidar Jogadores (Somente Host)
 
@@ -258,7 +260,13 @@ Boa sorte e que desbanquem logo essa Entidade! 🏆🎮
 
 ![Lobby Jogador PC](images/telasVersaoFinal/telaLobbyPcJogador.png)
 
-![Lobby Jogador Smartphone](images/telasVersaoFinal/telaLobbySpHost.png)
+![Lobby Jogador Smartphone](images/telasVersaoFinal/telaLobbySpJogador.png)
+
+### Tela Espectador - Novas Telas Não Existiam no Protótipo Inicial (Pc e Smartphone)
+
+![Espectador Pc](images/telasVersaoFinal/telaEspectadorPc.png)
+
+![Espectador Smartphone](images/telasVersaoFinal/telaEspectadorSp.png)
 
 ### Jogo — Visão Host PC
 

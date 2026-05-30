@@ -13,6 +13,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import PersonIcon from '@mui/icons-material/Person';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
+import TvIcon from '@mui/icons-material/Tv';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
@@ -403,6 +404,11 @@ function LobbyContent() {
               className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] hover:brightness-110"
               style={{ background: 'rgba(196,181,253,0.08)', border: '1px solid rgba(196,181,253,0.25)', color: '#C4B5FD' }}>
               <QrCode2Icon /> Convidar Jogadores
+            </button>
+            <button onClick={() => window.open('/espectador', '_blank')}
+              className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] hover:brightness-110"
+              style={{ background: 'rgba(196,181,253,0.08)', border: '1px solid rgba(196,181,253,0.2)', color: '#C4B5FD' }}>
+              <TvIcon /> Abrir Tela Espectador
             </button>
             {allPlayersRolled && (
               <button onClick={handleSetPlayOrder}
