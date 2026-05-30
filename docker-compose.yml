@@ -1,0 +1,82 @@
+services:
+
+  mariadb:
+    image: mariadb:10.11
+    container_name: perfil_mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpassword
+      MARIADB_DATABASE: moodle
+      MARIADB_USER: moodle
+      MARIADB_PASSWORD: moodle
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - perfil_net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  moodle:
+    build:
+      context: ./moodle
+      dockerfile: Dockerfile
+    container_name: perfil_moodle
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      MOODLE_DB_HOST: mariadb
+      MOODLE_DB_NAME: moodle
+      MOODLE_DB_USER: moodle
+      MOODLE_DB_PASS: moodle
+      MOODLE_ADMIN_USER: admin
+      MOODLE_ADMIN_PASS: admin123
+      MOODLE_WWWROOT: ${MOODLE_WWWROOT:-http://localhost:8080}
+      MOODLE_FULLNAME: PerfilNextFox AVA
+      MOODLE_SHORTNAME: PNF
+    volumes:
+      - moodle_data:/var/moodledata
+      - ./moodle-block/perfilnextfox:/var/www/html/blocks/perfilnextfox:ro
+    networks:
+      - perfil_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: perfil_backend
+    ports:
+      - "3001:3001"
+    environment:
+      LAN_IP: ${LAN_IP:-localhost}
+    volumes:
+      - quiz_db_data:/app/data
+    networks:
+      - perfil_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_INVITE_PORT: "8080"
+    container_name: perfil_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - perfil_net
+
+networks:
+  perfil_net:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+  moodle_data:
+  quiz_db_data:

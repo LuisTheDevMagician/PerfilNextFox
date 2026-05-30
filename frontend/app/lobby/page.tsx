@@ -54,8 +54,14 @@ function LobbyContent() {
   useEffect(() => {
     fetch(`http://${window.location.hostname}:3001/network-ip`)
       .then(r => r.json())
-      .then(({ ip }: { ip: string }) => setInviteUrl(`http://${ip}:3000`))
-      .catch(() => setInviteUrl(`http://${window.location.hostname}:3000`));
+      .then(({ ip }: { ip: string }) => {
+        const port = process.env.NEXT_PUBLIC_INVITE_PORT ?? '3000';
+        setInviteUrl(`http://${ip}:${port}`);
+      })
+      .catch(() => {
+        const port = process.env.NEXT_PUBLIC_INVITE_PORT ?? '3000';
+        setInviteUrl(`http://${window.location.hostname}:${port}`);
+      });
   }, []);
 
   const handleCopyUrl = async () => {
