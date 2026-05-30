@@ -19,25 +19,28 @@ services:
       retries: 10
 
   moodle:
-    image: bitnami/moodle:4
+    build:
+      context: ./moodle
+      dockerfile: Dockerfile
     container_name: perfil_moodle
     depends_on:
       mariadb:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "8080:80"
     environment:
-      MOODLE_DATABASE_HOST: mariadb
-      MOODLE_DATABASE_PORT_NUMBER: 3306
-      MOODLE_DATABASE_NAME: moodle
-      MOODLE_DATABASE_USER: moodle
-      MOODLE_DATABASE_PASSWORD: moodle
-      MOODLE_USERNAME: admin
-      MOODLE_PASSWORD: admin123
-      MOODLE_SITE_NAME: PerfilNextFox AVA
+      MOODLE_DB_HOST: mariadb
+      MOODLE_DB_NAME: moodle
+      MOODLE_DB_USER: moodle
+      MOODLE_DB_PASS: moodle
+      MOODLE_ADMIN_USER: admin
+      MOODLE_ADMIN_PASS: admin123
+      MOODLE_WWWROOT: http://localhost:8080
+      MOODLE_FULLNAME: PerfilNextFox AVA
+      MOODLE_SHORTNAME: PNF
     volumes:
-      - moodle_data:/bitnami/moodle
-      - ./moodle-block/block_perfilnextfox:/bitnami/moodle/blocks/block_perfilnextfox:ro
+      - moodle_data:/var/moodledata
+      - ./moodle-block/block_perfilnextfox:/var/www/html/blocks/block_perfilnextfox:ro
     networks:
       - perfil_net
 
