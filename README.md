@@ -133,6 +133,85 @@ Você pode rodar tudo no seu PC (Mestre) e os convidados entram pelo celular ou 
 
 ---
 
+## 🎓 Módulo AVA — Integração com Moodle (Pesquisa Acadêmica)
+
+> Este módulo faz parte do projeto de pesquisa **"Módulo Interativo para o Ensino de IHC no Moodle: Uma Abordagem Centrada em UX e Design Emocional"** (Identificador 3562/2026), desenvolvido no IFPI — Campus Corrente, no âmbito do Grupo de Pesquisa em Informática de Corrente (GPIC).
+>
+> O objetivo é integrar o PerfilNextFox como plugin (block) dentro de uma instância Moodle, permitindo que docentes apliquem o quiz diretamente no AVA institucional sem que os alunos precisem acessar uma URL separada.
+
+### Pré-requisitos
+
+- [Docker](https://docs.docker.com/get-docker/) e Docker Compose instalados
+- [Bun](https://bun.sh/) instalado globalmente
+
+### Subindo o ambiente completo
+
+O script `bunDockerCompose.ts` detecta automaticamente o IP da máquina na rede atual (Wi-Fi, cabo, hotspot) e injeta nos containers antes de subí-los. Use-o **sempre** no lugar do `docker compose up` direto:
+
+```bash
+# Primeira vez ou após trocar de rede:
+bun bunDockerCompose.ts --build
+
+# Execuções seguintes (sem mudança de código):
+bun bunDockerCompose.ts
+
+# Reset completo (apaga banco e dados do Moodle):
+docker compose down -v
+```
+
+Ao iniciar, o script exibe os endereços:
+```
+[start] IP detectado: 192.168.x.x
+[start] Moodle em:    http://192.168.x.x:8080
+[start] Jogo em:      http://192.168.x.x:3000
+```
+
+> **Trocou de rede?** Rode `bun bunDockerCompose.ts` novamente. O script corrige o `wwwroot` do Moodle automaticamente.
+
+### Primeiro acesso ao Moodle
+
+Acesse `http://localhost:8080` (ou pelo IP na rede) e entre com:
+- **Usuário:** `admin`
+- **Senha:** `admin123`
+
+> A primeira inicialização instala o Moodle completo — pode levar 1 a 3 minutos.
+
+### Configurando um curso para os alunos
+
+#### 1. Criar o curso
+- Menu superior → **Administração do site** → **Cursos** → **Adicionar curso**
+- Preencha nome completo e nome curto → **Salvar**
+
+#### 2. Habilitar acesso de visitante (sem cadastro)
+- Dentro do curso → aba **Participantes**
+- Clique no dropdown **"Usuários inscritos ˅"** (canto superior esquerdo da lista) → **Métodos de inscrição**
+- Na linha **Acesso como visitante**, clique no ícone de **olho** para habilitar
+- (Opcional) Clique no lápis para definir uma senha de visitante
+
+#### 3. Adicionar o bloco PerfilNextFox
+- Dentro do curso → ative o **Modo de edição** (botão canto superior direito)
+- No menu lateral → **Adicionar um bloco** → selecione **PerfilNextFox**
+- Desative o modo de edição
+
+#### 4. Compartilhar com os alunos
+Envie a URL do curso (ex: `http://192.168.x.x:8080/course/view.php?id=2`). O aluno:
+1. Clica em **"Entrar como visitante"**
+2. Vê o bloco com o botão **"▶ Iniciar PerfilNextFox"**
+3. O jogo abre em tela cheia dentro do Moodle
+
+### QR Code — porta 3000 vs 8080
+
+O QR Code de convite no lobby do jogo aponta para endereços diferentes dependendo do modo de execução:
+
+| Modo | Comando | QR Code aponta para |
+|---|---|---|
+| Desenvolvimento | `bun startgame.ts` | `http://<ip>:3000` (Next.js direto) |
+| Docker / AVA | `bun bunDockerCompose.ts` | `http://<ip>:8080` (Moodle) |
+
+No modo Docker, o link do QR code leva o aluno diretamente ao Moodle, onde ele encontra o bloco e inicia o jogo integrado ao AVA.
+
+---
+
 ## 📄 Licença
 
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20NC%201.0-blue)](https://polyformproject.org/licenses/noncommercial/1.0.0)
