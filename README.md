@@ -199,6 +199,49 @@ Envie a URL do curso (ex: `http://192.168.x.x:8080/course/view.php?id=2`). O alu
 2. Vê o bloco com o botão **"▶ Iniciar PerfilNextFox"**
 3. O jogo abre em tela cheia dentro do Moodle
 
+### Alternativa — Moodle já instalado no servidor
+
+Se você já possui uma instância Moodle rodando em um servidor próprio (sem Docker), o processo é mais simples: basta instalar o plugin e subir o jogo na mesma máquina.
+
+#### 1. Copiar o plugin para o Moodle
+
+Copie a pasta do bloco para o diretório de blocos da sua instalação Moodle:
+
+```bash
+cp -r moodle-block/perfilnextfox /var/www/html/moodle/blocks/
+# ajuste o caminho conforme onde seu Moodle está instalado
+```
+
+Em seguida, acesse **Administração do site → Notificações** no Moodle — ele detecta e instala o plugin automaticamente.
+
+#### 2. Subir o jogo no mesmo servidor
+
+O plugin aponta o iframe para `http://<host-do-moodle>:3000`. Por isso, o jogo precisa estar rodando **na mesma máquina** que o Moodle, na porta 3000:
+
+```bash
+# instala dependências e sobe backend (3001) + frontend (3000)
+bun startgame.ts
+```
+
+> Se o servidor for Linux, pode rodar o jogo em background com `nohup bun startgame.ts &` ou configurá-lo como serviço systemd.
+
+#### 3. Adicionar o bloco a um curso
+
+Os passos são os mesmos da instalação Docker:
+- Dentro do curso → **Modo de edição** → **Adicionar um bloco** → **PerfilNextFox**
+- Habilite **Acesso como visitante** em Participantes → Métodos de inscrição
+
+#### Resumo das diferenças entre os modos
+
+| | Docker (deste projeto) | Moodle próprio |
+|---|---|---|
+| Moodle | Incluído nos containers | Você já tem um |
+| Instalação do plugin | Automática (bind-mount) | Cópia manual da pasta |
+| Porta do jogo no QR Code | 8080 (aponta pro Moodle) | 3000 (Next.js direto) |
+| Requisito extra | Docker + Bun | Bun |
+
+---
+
 ### QR Code — porta 3000 vs 8080
 
 O QR Code de convite no lobby do jogo aponta para endereços diferentes dependendo do modo de execução:

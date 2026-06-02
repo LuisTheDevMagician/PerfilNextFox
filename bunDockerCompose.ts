@@ -28,6 +28,27 @@ const proc = spawn(['docker', 'compose', 'up', '-d', ...extraArgs], {
 
 await proc.exited;
 
+// Aguarda config.php existir (primeira execução roda install.php, que demora alguns minutos)
+const maxWaitMs = 5 * 60 * 1000;
+const startWait = Date.now();
+let configReady = false;
+
+while (Date.now() - startWait < maxWaitMs) {
+  const check = spawn(
+    ['docker', 'exec', 'perfil_moodle', 'test', '-f', '/var/www/html/config.php'],
+    { stdout: 'ignore', stderr: 'ignore' },
+  );
+  await check.exited;
+  if (check.exitCode === 0) { configReady = true; break; }
+  console.log('\x1b[36m[start]\x1b[0m Aguardando Moodle instalar (config.php)...');
+  await Bun.sleep(3000);
+}
+
+if (!configReady) {
+  console.error('\x1b[31m[start]\x1b[0m Timeout: config.php não apareceu em 5 min. Verifique os logs com: docker logs perfil_moodle');
+  process.exit(1);
+}
+
 // Atualiza wwwroot no config.php caso Moodle já estivesse instalado com IP diferente
 const update = spawn([
   'docker', 'exec', 'perfil_moodle',
