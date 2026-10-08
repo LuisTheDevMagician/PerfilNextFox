@@ -13,7 +13,7 @@ This is a monorepo with two separate services that must both run concurrently:
 - **`backend/`** — Bun + Elysia 1.x server on port **3001**. Handles all game logic, player sessions, and real-time events via native Bun WebSocket.
 - **`frontend/`** — Next.js 16 App Router on port **3000**. Pure UI layer; all state comes from WebSocket events. Uses React 19, Material UI v7 (`@mui/material`), and Tailwind CSS v4 for styling.
 
-The frontend connects to `window.location.hostname:3001/ws`, so it automatically works on LAN when accessed by IP. No build-time config needed for LAN play.
+The frontend connects to `window.location.hostname:3001/ws`, so it automatically works on LAN when accessed by IP. No build-time config needed for LAN play. If phones get `ERR_CONNECTION_REFUSED` while the invite IP is correct, suspect the host firewall before the code: on Fedora/firewalld, a NetworkManager hotspot (`10.42.0.1`) runs in the `nm-shared` zone, which rejects everything except DHCP/DNS/SSH, so ports 3000/3001 (and 8080 for Moodle) must be opened in that zone.
 
 ## Development Commands
 
@@ -58,7 +58,7 @@ A root `tsconfig.json` exists solely to give the TypeScript language server type
 
 **Database:** SQLite at `data/quiz.db` via `bun:sqlite`. Every read and write goes through raw `sqlite.prepare()` statements in `src/db/queries.ts`, which return snake_case rows (the `mapDbTo*` helpers in `game.ts` normalise them). `drizzle-orm` is wired up (`db` export in `src/db/index.ts`, schema in `src/db/schema.ts`) but **nothing queries through it**, and `schema.ts` is out of sync with the real tables (no `tema_id` on `sessoes_jogo`, no content tables) — add new queries to `queries.ts` as raw SQL rather than relying on it. Tables are created by raw `CREATE TABLE` statements in `src/db/index.ts:initDatabase()`, which also handles `ALTER TABLE` migrations idempotently (try/catch). `drizzle-kit` is installed as a dev dependency but there is no `drizzle.config.ts` — all schema changes must go through `initDatabase()` as idempotent SQL, not through `drizzle-kit` migrations. Seeded on startup from `src/db/seed.ts` (skipped once the seed disciplina exists).
 
-`backend/data/quiz.db` is committed to git (only the `-wal`/`-shm` sidecars are ignored), so playing locally can leave it modified — don't commit it unintentionally. Docker excludes it via `.dockerignore` and uses the `quiz_db_data` volume instead.
+`backend/data/quiz.db` is committed to git (only the `-wal`/`-shm` sidecars are ignored), so playing locally can leave it modified — don't commit it unintentionally. Docker excludes it via `.dockerignore` and uses the `quiz_db_data` volume instead, so cards created locally don't exist in Docker mode (it starts from `seed.ts` only).
 
 Active session tables: `sessoes_jogo`, `jogadores_sessao`, `respostas_pendentes`. Persistent stats tables: `jogadores` (global scores/wins per player name) and `historico_partidas` (past match outcomes) are **written** by the game loop (`upsertJogador` on join; score, win and history rows in `encerrarJogo()`) but never read by any endpoint or screen. Content tables for the admin panel: `disciplinas`, `temas`, `cartas` (`cartas.dicas` is a JSON-encoded array of exactly 10 strings).
 
@@ -89,6 +89,12 @@ Active session tables: `sessoes_jogo`, `jogadores_sessao`, `respostas_pendentes`
 - On reconnect, `handleRequestGameState` includes `turnStartedAt: gerenciadorJogo.getTurnStartedAt()` so the reconnecting client can resume the correct countdown offset.
 
 **Card source:** Cards are fetched from the DB by `temaId` if a theme is selected; otherwise fall back to all cards, then to the hardcoded `gameCards` array in `src/models.ts` (mirrored in `frontend/lib/cards.ts`). This lookup is duplicated in `getCartaAtual()`, `getTotalCartas()` and `proximaCarta()`, and they disagree when no theme is selected: `proximaCarta()` ends the game at `gameCards.length` while the other two use all DB cards. Change the three together when touching card selection.
+
+**Card content:** `CARTAS.md` is the user-facing guide to the disciplina → tema → carta hierarchy and card-writing conventions (linked from `README.md`). Keep it in sync if you change admin/API validation, card ordering or scoring. Facts that matter when authoring or seeding content:
+- A match plays every card of the selected tema, in the order `buscarCartasPorTema` returns them. That query has no `ORDER BY`, so in practice it's insertion (rowid) order — a deck meant to go easy → hard must be inserted in that order, and reordering means recreating the cards.
+- Players pick any clue index on their turn (`reveal-clue` carries the index), so clue order is only a convention: clue 1 hardest → clue 10 almost gives the answer away, written in first person, never containing the answer.
+- The lobby's theme selector hides temas with zero cards.
+- For bulk authoring, script against the REST API rather than writing SQLite directly — it enforces the same rules as the admin panel (name, tema, exactly 10 non-empty clues). The backend must be running; when it isn't, start it temporarily from `backend/` with `bun src/index.ts` and stop it afterwards. Check `GET /game-state` first so cards aren't changed mid-match.
 
 **Session reactivation:** When a client reconnects, `reativarJogador` in `game.ts` looks up the player by searching `allJogadores` (already scoped to the current session via `buscarJogadoresSessao`) rather than the global `buscarJogadorPorSessionId` — this prevents old records from previous sessions matching and causing fake "lobby full" errors or HOST identity loss. One remaining guard: if the stored socket ID is non-empty and differs from the reconnecting socket, reactivation is refused (prevents multi-tab identity theft).
 
@@ -151,6 +157,8 @@ docker compose down -v            # full reset (drops DB and Moodle data volumes
 | `perfil_frontend` | 3000 | Next.js (same image as dev) |
 | `perfil_backend` | 3001 | Bun/Elysia (same image as dev) |
 | `perfil_mariadb` | 3306 | MariaDB for Moodle (not used by the game) |
+
+**Known issue — backend image:** `backend/package.json` `start` now runs `dist/index.js`, but `backend/Dockerfile` never runs `bun run build` and `.dockerignore` excludes `dist`, so a freshly built backend image fails to start. Adding `RUN bun run build` after the `COPY` lines should fix it.
 
 **LAN IP injection:** `bunDockerCompose.ts` detects the host's first non-internal IPv4 and passes it as two env vars: `MOODLE_WWWROOT=http://<ip>:8080` and `LAN_IP=<ip>`. The backend reads `LAN_IP` in `getLanIp()`. If you change networks (e.g. Wi-Fi → cable → hotspot), re-run `bunDockerCompose.ts` to update both.
 

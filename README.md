@@ -126,6 +126,14 @@ Você pode rodar tudo no seu PC (Mestre) e os convidados entram pelo celular ou 
 
 ---
 
+## 🃏 Criando Cartas e Temas
+
+O conteúdo do jogo é organizado em **Disciplina → Tema → Carta**, e cada carta tem exatamente 10 dicas. As cartas são cadastradas pelo painel em `http://localhost:3000/admin`.
+
+Veja o **[Guia de Cartas (CARTAS.md)](CARTAS.md)** para entender a hierarquia, como escrever boas dicas e como cadastrar cartas em lote pela API.
+
+---
+
 ## 🐛 Resolução de Problemas / Troubleshooting
 
 - **A tela fica em um ciclo "Aguardando Conexão... / Conectando" e não entra na Home:** O servidor Bun desligou, resetou ou sofreu erro, cheque o console rodando em seu Terminal de Backend.
