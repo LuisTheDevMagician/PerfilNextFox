@@ -19,21 +19,25 @@ The frontend connects to `window.location.hostname:3001/ws`, so it automatically
 
 **Both services at once** (from repo root):
 ```bash
-bun startgame.ts   # starts backend (3001) + frontend (3000) in parallel, prefixed logs
+bun startgame.ts   # production mode: backend (3001) + frontend (3000) in parallel, prefixed logs
 ```
 
-**Backend only** (from `backend/`):
+`startgame.ts` runs the **built** artifacts (`backend/dist/index.js` and `frontend/.next/standalone/server.js`), not the dev servers. It installs dependencies if `node_modules` is missing and builds only if those two files are **absent** — it never rebuilds. After editing source, it keeps serving the old build until you run `bun run build` in the affected service (or delete `backend/dist` / `frontend/.next`). When iterating on code, run the two `bun run dev` commands below in separate terminals instead.
+
+**Backend only** (from `backend/` — the DB path `./data/quiz.db` is cwd-relative):
 ```bash
 bun install
-bun run dev        # watch mode
-bun run start      # production
+bun run dev        # watch mode, runs src/index.ts directly
+bun run build      # bundles to dist/index.js (--target bun)
+bun run start      # runs dist/index.js — requires a build first
 ```
 
 **Frontend only** (from `frontend/`):
 ```bash
 bun install
 bun run dev        # Next.js with Turbopack
-bun run build
+bun run build      # next build with output: 'standalone'
+bun run start      # copies public/ and .next/static into .next/standalone, then runs server.js on 0.0.0.0:3000
 bun run lint       # eslint
 ```
 
@@ -52,16 +56,20 @@ A root `tsconfig.json` exists solely to give the TypeScript language server type
 
 **Game state:** `src/game.ts` — `GerenciadorJogo` singleton (`gerenciadorJogo`) holds all runtime state in memory (player maps, current card, turn tracking) and syncs to SQLite via `src/db/queries.ts`. State persists across server restarts through `carregarSessaoAtiva()` on construction.
 
-**Database:** SQLite at `data/quiz.db` via `bun:sqlite` + `drizzle-orm`. Drizzle schema (for typed queries) in `src/db/schema.ts`; raw SQL `CREATE TABLE` statements in `src/db/index.ts:initDatabase()` (also handles `ALTER TABLE` migrations idempotently). Seeded on startup from `src/db/seed.ts`. `drizzle-kit` is installed as a dev dependency but there is no `drizzle.config.ts` — all schema changes must go through `initDatabase()` as idempotent SQL, not through `drizzle-kit` migrations.
+**Database:** SQLite at `data/quiz.db` via `bun:sqlite`. Every read and write goes through raw `sqlite.prepare()` statements in `src/db/queries.ts`, which return snake_case rows (the `mapDbTo*` helpers in `game.ts` normalise them). `drizzle-orm` is wired up (`db` export in `src/db/index.ts`, schema in `src/db/schema.ts`) but **nothing queries through it**, and `schema.ts` is out of sync with the real tables (no `tema_id` on `sessoes_jogo`, no content tables) — add new queries to `queries.ts` as raw SQL rather than relying on it. Tables are created by raw `CREATE TABLE` statements in `src/db/index.ts:initDatabase()`, which also handles `ALTER TABLE` migrations idempotently (try/catch). `drizzle-kit` is installed as a dev dependency but there is no `drizzle.config.ts` — all schema changes must go through `initDatabase()` as idempotent SQL, not through `drizzle-kit` migrations. Seeded on startup from `src/db/seed.ts` (skipped once the seed disciplina exists).
 
-Active session tables (in both `schema.ts` and `initDatabase()`): `sessoes_jogo`, `jogadores_sessao`, `respostas_pendentes`. Persistent stats tables (in both but **not queried** by the current game loop — exist for future use): `jogadores` (global scores/wins per player name), `historico_partidas` (past match outcomes). Content tables for the admin panel (in `initDatabase()` only — **not** in `schema.ts`, accessed via raw SQL queries): `disciplinas`, `temas`, `cartas`. Note: `tema_id` on `sessoes_jogo` exists in `initDatabase()` raw SQL and ALTER TABLE migration but is absent from the Drizzle `schema.ts` — use raw `sqlite.prepare()` (not `db`) to read/write it.
+`backend/data/quiz.db` is committed to git (only the `-wal`/`-shm` sidecars are ignored), so playing locally can leave it modified — don't commit it unintentionally. Docker excludes it via `.dockerignore` and uses the `quiz_db_data` volume instead.
+
+Active session tables: `sessoes_jogo`, `jogadores_sessao`, `respostas_pendentes`. Persistent stats tables: `jogadores` (global scores/wins per player name) and `historico_partidas` (past match outcomes) are **written** by the game loop (`upsertJogador` on join; score, win and history rows in `encerrarJogo()`) but never read by any endpoint or screen. Content tables for the admin panel: `disciplinas`, `temas`, `cartas` (`cartas.dicas` is a JSON-encoded array of exactly 10 strings).
 
 **WebSocket protocol** (all handled in `src/ws.ts`): All messages are JSON `{ event: string, data: any }`. On connect, server immediately sends `{ event: 'session-id', data: { id: string } }` — this ID is the stable Elysia `ws.id` (derived from a closure in `raw.data.id`, not a UUID). Connection tracking uses `connections: Map<string, ServerWebSocket>` keyed by `ws.id`. Helper functions: `broadcast`, `sendTo`, `broadcastExcept`.
 
 > **Elysia WS internals:** Elysia creates a new `ElysiaWS` wrapper object on every handler call (`open`, `message`, `close`). `ws.raw` is the underlying stable Bun `ServerWebSocket`. Always store `ws.raw` in the connections map and use `ws.id` (not the wrapper object) as the key. Elysia auto-parses JSON messages before calling `message(ws, raw)`, so `raw` arrives as an already-parsed object, not a string — `ws.ts` handles both cases.
 
 - Client → Server: `join-lobby`, `request-game-state`, `roll-dice`, `set-play-order`, `select-theme`, `start-game`, `reveal-clue`, `pass-turn`, `submit-answer`, `validate-answer`, `reveal-answer`, `restart-game`, `exit-victory-screen`, `sair-lobby`, `spectator-join`
-- Server → Client: `session-id`, `joined-lobby`, `lobby-state`, `player-joined`, `player-left`, `dice-rolled`, `play-order-set`, `theme-selected`, `game-started`, `clue-revealed`, `new-answer`, `answer-correct`, `answer-incorrect`, `answers-updated`, `next-card`, `answer-revealed`, `victory-state`, `game-ended`, `game-restarted`, `return-to-lobby`, `answer-submitted`, `spectator-state`
+- Server → Client: `session-id`, `joined-lobby`, `lobby-full`, `error`, `lobby-state`, `player-joined`, `player-left`, `dice-rolled`, `play-order-set`, `theme-selected`, `game-started`, `clue-revealed`, `new-answer`, `answer-correct`, `answer-incorrect`, `answers-updated`, `next-card`, `answer-revealed`, `victory-state`, `game-restarted`, `return-to-lobby`, `answer-submitted`, `spectator-state`
+- The frontend also registers listeners for `game-ended`, `next-player` and `name-taken`, but the server never emits them — those handlers are dead. A duplicate player name is reported as `lobby-full` (`adicionarJogador` returns `null` for both a full lobby and a name already in use).
+- `join-lobby` carries `{ nome, sessionId }`. It creates a new session (deactivating any other) when there is no active session **or no currently connected player**, then reactivates or adds the player; the first player added to a session becomes HOST.
 - `spectator-join` is handled in `ws.ts` without registering a player — responds with `spectator-state` containing full session snapshot (or `{ gameStarted: false, players: [] }` if no active session). Any WebSocket connection receives all `broadcast` events regardless of whether it called `join-lobby`, so the spectator tab gets real-time updates automatically.
 - `game-started` and `next-card` events include `currentCardIndex` (0-based) and `totalCards` for the card progress counter.
 - Most turn-change events (`game-started`, `clue-revealed` on pass, `answer-incorrect`, `next-card`) include `turnStartedAt: Date.now()` — a Unix ms timestamp clients use to compute remaining time independently (no per-tick WS messages). `answer-submitted` is broadcast when any player submits an answer, signalling all clients to freeze their countdown display immediately.
@@ -80,7 +88,7 @@ Active session tables (in both `schema.ts` and `initDatabase()`): `sessoes_jogo`
 - `cancelarTimerVez()` is called at the start of `revelarResposta()` to prevent a ghost auto-pass during the 3-second reveal delay.
 - On reconnect, `handleRequestGameState` includes `turnStartedAt: gerenciadorJogo.getTurnStartedAt()` so the reconnecting client can resume the correct countdown offset.
 
-**Card source:** Cards are fetched from the DB by `temaId` if a theme is selected; otherwise fall back to all cards, then to the hardcoded `gameCards` array in `src/models.ts` (mirrored in `frontend/lib/cards.ts`).
+**Card source:** Cards are fetched from the DB by `temaId` if a theme is selected; otherwise fall back to all cards, then to the hardcoded `gameCards` array in `src/models.ts` (mirrored in `frontend/lib/cards.ts`). This lookup is duplicated in `getCartaAtual()`, `getTotalCartas()` and `proximaCarta()`, and they disagree when no theme is selected: `proximaCarta()` ends the game at `gameCards.length` while the other two use all DB cards. Change the three together when touching card selection.
 
 **Session reactivation:** When a client reconnects, `reativarJogador` in `game.ts` looks up the player by searching `allJogadores` (already scoped to the current session via `buscarJogadoresSessao`) rather than the global `buscarJogadorPorSessionId` — this prevents old records from previous sessions matching and causing fake "lobby full" errors or HOST identity loss. One remaining guard: if the stored socket ID is non-empty and differs from the reconnecting socket, reactivation is refused (prevents multi-tab identity theft).
 
@@ -97,13 +105,15 @@ Active session tables (in both `schema.ts` and `initDatabase()`): `sessoes_jogo`
 - `/admin` (`admin/page.tsx`) — content management UI for disciplinas, temas, and cartas (CRUD via REST API); tab components live in `admin/components/` (DisciplinasTab, TemasTab, CartasTab)
 - `/sobre` (`sobre/page.tsx`) — static about/landing page; navigates to `/` directly
 
-**Socket singleton:** `lib/socket.ts` — `getSocket()` returns a lazily-created `WsClient` instance (native WebSocket wrapper), connecting to `hostname:3001/ws`. The `WsClient` class mimics Socket.IO's `.on/.off/.emit` API. All messages are JSON `{ event, data }`. Session persistence uses a UUID in `localStorage` (`perfil_session_id`) sent as `?sessionId=` query param on connect; `'connect'` event fires only after the server sends `session-id` (so `socket.id` is populated before handlers run). Auto-reconnects up to 5 times with linear backoff (1 s, 2 s, 3 s … per attempt). UUID generation uses `crypto.randomUUID()` with a `Math.random()`-based fallback for non-HTTPS contexts (mobile browsers on HTTP).
+**Socket singleton:** `lib/socket.ts` — `getSocket()` returns a lazily-created `WsClient` instance (native WebSocket wrapper), connecting to `hostname:3001/ws`. The `WsClient` class mimics Socket.IO's `.on/.off/.emit` API. All messages are JSON `{ event, data }`. Session persistence uses a UUID in `localStorage` (`perfil_session_id`). It is appended as `?sessionId=` on connect, but the server never reads the query string — what `reativarJogador` actually matches is the `sessionId` field pages send in the `join-lobby` payload (via `getSessionId()`). `'connect'` event fires only after the server sends `session-id` (so `socket.id` is populated before handlers run). Auto-reconnects up to 5 times with linear backoff (1 s, 2 s, 3 s … per attempt). UUID generation uses `crypto.randomUUID()` with a `Math.random()`-based fallback for non-HTTPS contexts (mobile browsers on HTTP).
 
 **Spectator socket:** `lib/spectatorSocket.ts` — `getSpectatorSocket()` returns a separate `SpectatorWsClient` singleton. Connects with `?spectator=true` (no `perfil_session_id`) so it never interferes with the player's session. On receiving `session-id`, immediately emits `spectator-join`; the backend responds with `spectator-state` (current game snapshot) without registering a player. Receives all broadcasts passively. Never call `join-lobby` or any action event from this socket.
 
-**Game constants:** `lib/config.ts` — exports `GAME_CONFIG` (max players, correct-answer display time, clues per card). Prefer changing constants here over scattering magic numbers in components. Note: `SERVER_PORT` and `SERVER_URL` fields exist in this file but are **not used** — `socket.ts` hardcodes `hostname:3001/ws` directly.
+**Backend URL:** there is no shared API base. Both sockets and the lobby's `/network-ip` fetch use `window.location.hostname:3001` (LAN-safe), but the three admin tabs (`const API = 'http://localhost:3001/api'`) and the lobby's HOST theme-selector fetch are hardcoded to `localhost:3001` — they only work in a browser on the machine running the backend. The `NEXT_PUBLIC_BACKEND_URL` / `NEXT_PUBLIC_WS_URL` build args in `frontend/Dockerfile` are not read by any code.
 
-**Fallback cards:** `lib/cards.ts` — frontend-side duplicate of the hardcoded `gameCards` array (same data as `backend/src/models.ts`). Used if the backend sends no card data.
+**Game constants:** `lib/config.ts` exports `GAME_CONFIG`, but **nothing imports it**. The real values are hardcoded at their use sites (`9` players in `game.ts`, `40` s / `42000` ms for the turn timer in `game/page.tsx` / `game.ts`, `3000` ms reveal delays in `ws.ts` and `game.ts`) — changing `config.ts` alone has no effect.
+
+**Fallback cards:** `lib/cards.ts` — frontend-side duplicate of the hardcoded `gameCards` array (same data as `backend/src/models.ts`). Only its `Card` type is imported (by `game/page.tsx`); the array itself is unused.
 
 **Shared overlay components:** `app/components/RespostasOverlay.tsx` — exports `Modal`, `CountdownRing`, `OverlayAcerto`, `OverlayErro`, `OverlayNinguemAcertou`. Each overlay component manages its own sound (`soundManager.play`) and auto-dismiss (`setTimeout`) via `useEffect`; the parent just sets `show={true}` and provides an `onDismiss` callback. `game/page.tsx` and `espectador/page.tsx` both import from here — do not duplicate these definitions. `OverlayNinguemAcertou` stops its sound in the `useEffect` cleanup so audio cuts immediately when the overlay dismisses.
 
@@ -117,7 +127,7 @@ Active session tables (in both `schema.ts` and `initDatabase()`): `sessoes_jogo`
 
 - Max 9 players per session (enforced in `GerenciadorJogo.adicionarJogador`).
 - Each player may only reveal one clue per turn (`revelouEstaTurno` flag, persisted to DB).
-- Only the HOST can: start game, validate answers, reveal answer, select theme, restart.
+- Only the HOST can: start game, validate answers, reveal answer, select theme, restart. The server enforces this (`e_host` check in `ws.ts`) for `set-play-order`, `select-theme`, `start-game`, `restart-game` and `exit-victory-screen` only; `validate-answer` and `reveal-answer` have **no** server-side HOST check and are gated solely by the HOST UI.
 - `validate-answer` auto-calculates points server-side; the client does not send a points value.
 - Disconnects are soft (socket ID cleared to `''`, player kept in DB); `sair-lobby` is a hard remove.
 - The HOST does not accumulate score and their score is not displayed in either game view.
