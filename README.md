@@ -1,6 +1,19 @@
 # 🎮 Jogo Perfil - Quiz Multiplayer
 
-[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20NC%201.0-blue)](https://polyformproject.org/licenses/noncommercial/1.0.0)
+<p align="center">
+  <img alt="License: PolyForm Noncommercial" src="https://img.shields.io/badge/License-PolyForm%20NC%201.0-blue?style=for-the-badge">
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white&style=for-the-badge">
+  <img alt="React" src="https://img.shields.io/badge/React-19-20232A?logo=react&logoColor=61DAFB&style=for-the-badge">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white&style=for-the-badge">
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind%20CSS-4-06B6D4?logo=tailwindcss&logoColor=white&style=for-the-badge">
+  <img alt="Material UI" src="https://img.shields.io/badge/Material%20UI-7-007FFF?logo=mui&logoColor=white&style=for-the-badge">
+  <img alt="Bun" src="https://img.shields.io/badge/Bun-runtime-000000?logo=bun&logoColor=FBF0DF&style=for-the-badge">
+  <img alt="Elysia" src="https://img.shields.io/badge/Elysia-1.x-7C3AED?style=for-the-badge">
+  <img alt="WebSocket" src="https://img.shields.io/badge/WebSocket-nativo-4B5563?style=for-the-badge">
+  <img alt="SQLite" src="https://img.shields.io/badge/SQLite-banco-003B57?logo=sqlite&logoColor=white&style=for-the-badge">
+  <img alt="Docker" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white&style=for-the-badge">
+  <img alt="Moodle" src="https://img.shields.io/badge/Moodle-AVA-F98012?logo=moodle&logoColor=white&style=for-the-badge">
+</p>
 
 Jogo web multiplayer local estilo "Perfil" (jogo de adivinhação com dicas progressivas) com arquitetura separada em **Backend** (Bun + Elysia) e **Frontend** (Next.js 16+). Suporta até 9 jogadores simultâneos em tempo real via rede local.
 
